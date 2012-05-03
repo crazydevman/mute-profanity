@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <!-- Addon Name -->
+    <string id="30000">My Addon</string>
+    <!-- some other strings -->
+    <string id="30100">Hello</string>
+    <!-- Settings -->
+    <string id="30200">Ask to download missing subtitles</string>
+    <string id="30210">Mute before and after (in MS)</string>
+    <string id="30220">Debugging (restart script to apply)</string>
+</strings>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="General">
+        <setting id="download" type = "bool" label="30200" default="true" />
+        <setting id="safety" type="slider" subsetting="true" default="300" range="0,5,1000" option="int" label="30210" />
+        <setting type="sep" />
+        <setting id="debug" type="bool" label="30220" default="true" />
+    </category>
+</settings>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon
+id="plugin.video.mute-profanity"
+version="0.0.1"
+name="Mute Profanity"
+provider-name="Scott Brown"
+>
+<requires> </requires>
+<extension point="xbmc.python.pluginsource" library="addon.py">
+    <provides>audio video</provides>
+</extension>
+<extension point="xbmc.addon.metadata">
+    <summary>Creates EDL files that mute profanity</summary>
+    <description>XBMC has the ability to mute the audio at certain times based on a EDL (edit decision list) file. This addon will create an EDL file by reading subtitles, and determining times when certain blocked words are played. The list of muted words is configurable.</description>
+    <platform>all</platform>
+    </extension>
+</addon>
