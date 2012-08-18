@@ -16,4 +16,13 @@
     <string id="30230">Mplayer path</string>
     <string id="30240">Mencoder path</string>
     <string id="30250">Mp4Box path</string>
+
+    <!--Messages-->
+    <string id="30300">Mute Profanity</string>
+    <string id="30301">This will overwrite the existing mute profanity file.\nAre you sure you would like to do this?</string>
+    <string id="30302">Do you want mute profanity for this movie?</string>
+    <string id="30303">Success! You can now play the movie normally</string>
+    <string id="30304">Could not find subtiles file, download one?</string>
+    <string id="30305">Downloading subtitles...</string>
+    <string id="30306">Unable to download file.\nTry again later</string>
 </strings>
