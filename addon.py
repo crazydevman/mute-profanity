@@ -23,6 +23,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 
 from UIManager import UIManager
 from EDLCreator import EDLCreator
+from config import plugin
 import JSONUtils as data
 import SubDownloader as dl
 
@@ -85,7 +86,7 @@ def createEDL():
         safety = float(safety) / 1000
         edl = EDLCreator(srtLoc, filterLoc, safety)
         if existsEDL(srtLoc):
-            ret = dialog.yesno(details['label'], 'This will overwrite the existing mute profanity file.\nAre you sure you would like to do this?')
+            ret = dialog.yesno(details['label'], plugin.get_string(30301))
             if not ret:
                 return False
         edl.createEDL()
@@ -105,7 +106,7 @@ if mode == 'movie-details':
     xbmc.log('details: %s' % details)
     
     dialog = xbmcgui.Dialog()
-    ret = dialog.yesno(details['label'], 'Do you want mute profanity for this movie?')
+    ret = dialog.yesno(details['label'], plugin.get_string(30302))
     if not ret:
         sys.exit()
     
@@ -114,20 +115,20 @@ if mode == 'movie-details':
     if srtLoc:
         xbmc.log("Found srt file: %s" % srtLoc)
         if createEDL():
-            dialog.ok(details['label'], "Success! You can now play the movie normally")
+            dialog.ok(details['label'], plugin.get_string(30303))
     else:
         xbmc.log("No srt file!")
-        ret = dialog.yesno(details['label'], 'Could not find subtiles file, download one?')
+        ret = dialog.yesno(details['label'], plugin.get_string(30304))
         if ret:
             pDialog = xbmcgui.DialogProgress()
-            ret = pDialog.create('XBMC', 'Downloading subtitles...')
+            ret = pDialog.create('XBMC', plugin.get_string(30305))
             xbmc.log('Downloading')
             try:
                 dl.FindSubtitles(fileLoc,"eng")
                 srtLoc = getSRT(fileLoc)
             except:
                 print traceback.format_exc()
-                dialog.ok('XBMC', 'Unable to download file.\nTry again later')
+                dialog.ok('XBMC', plugin.get_string(30306))
             
             if (pDialog.iscanceled()): 
                 sys.exit()
@@ -135,9 +136,9 @@ if mode == 'movie-details':
             
             if srtLoc:
                 if createEDL():
-                    dialog.ok(details['label'], "Success! You can now play the movie normally")
+                    dialog.ok(details['label'], plugin.get_string(30303))
             else:
-                dialog.ok('XBMC', 'Unable to download file.\nTry again later')
+                dialog.ok('XBMC', plugin.get_string(30306))
 else:
     movieDict = data.GetAllMovies()
     xbmc.log("movieDict: %s" % movieDict)
