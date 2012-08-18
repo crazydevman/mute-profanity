@@ -3,8 +3,17 @@ Created on Apr 7, 2012
 
 @author: Scott Brown
 '''
+#TODO:
+#Extract srt from mp4 (use mp4Box)
+#Option to edit srt file and **** profanity and/or make "profanity-bleeped only" srt
+#DONE -- Determine how to make find command search for complete words
+#Option to export edl as txt for use in audacity
+#Option to import existing edl with skips
+#DONE -- Expand profanity list
+#Option to have categories of profanity bleeped (profanities, vulgarities, sexual explicits)
 
 import sys
+import re
 
 class EDLCreator(object):
     '''
@@ -31,8 +40,8 @@ class EDLCreator(object):
         except IOError:
             print "Cannot open file"
             sys.exit()
-        
-        ignored = ["<i>", "</i>", "<b>", "</b>", "<u>", "</u>", "'", "\"", "[", "]", "{", "}", "-"]
+        #ignored = []
+        ignored = ["<i>", "</i>", "<b>", "</b>", "<u>", "</u>", " '", "' ", "\"", "[", "]", "{", "}"]
         one_char = ["&nbsp;", "\r\n", "\n", "\r", "<br>", ".", ",", "?", "!", ";"]
 
         # create profanity list from filter
@@ -92,14 +101,15 @@ class EDLCreator(object):
             subtitle = subtitle.strip()
             subtitle = subtitle.strip(' -?!.')
             
+            
             mutes = []
         
             for word in profanity:
-                index = subtitle.find(word);
-                while index != -1: #keep going in case more instances of this word occur
-                    mute = (index, len(word))
-                    mutes.append(mute)   
-                    index = subtitle.find(word, index + 1)
+				regex = r"\b" + re.escape(word) + r"\b"
+				iterator = re.finditer(regex, subtitle, re.IGNORECASE)
+				for match in iterator:					
+					mute = (match.start(), len(word))
+					mutes.append(mute)   
         
             if mutes:
                 mutes = sorted(mutes, key=lambda mute:mute[0])
