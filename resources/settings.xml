@@ -1,9 +1,18 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+	<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-    <category label="General">
-        <setting id="download" type = "bool" label="30200" default="true" />
-        <setting id="safety" type="slider" subsetting="true" default="300" range="0,5,1000" option="int" label="30210" />
-        <setting type="sep" />
+    <category label="30100">
+        <setting id="extractsrt" type = "bool" label="30110" default="true" />
+        <setting id="download" type = "bool" label="30120" default="true" />
+        <setting id="importsrt" type = "bool" label="30130" default="true" />
+        <setting id="editsrt" type = "bool" label="30140" default="true" />
+        <setting id="createsrt" type = "bool" label="30150" default="true" />
+        <setting id="safety" type="slider" subsetting="true" default="300" range="0,5,1000" option="int" label="30160" />
+    </category>
+    <category label="30200">
+        <setting id="exportedl2txt" type="bool" label="30210" default="true" />
         <setting id="debug" type="bool" label="30220" default="true" />
+        <setting id="mplayerPath" type="file" source="auto" default="" label="30230" />
+        <setting id="mencoderPath" type="file" source="auto" default="" label="30240" />
+        <setting id="mp4BoxPath" type="file" source="auto" default="" label="30250" />
     </category>
 </settings>
