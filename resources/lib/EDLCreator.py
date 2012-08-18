@@ -32,14 +32,16 @@ class EDLCreator(object):
         except IOError:
             print "Cannot open file"
             sys.exit()
-        #ignored = []
+            
         ignored = ["<i>", "</i>", "<b>", "</b>", "<u>", "</u>", " '", "' ", "\"", "[", "]", "{", "}"]
         one_char = ["&nbsp;", "\r\n", "\n", "\r", "<br>", ".", ",", "?", "!", ";"]
 
         # create profanity list from filter
         profanity = []
         for line in filterFile:
-            profanity.append(line[:-1].lower())
+            if len(line):
+                asRegex = line.strip().lower().replace('*', '\w*')
+                profanity.append(asRegex)
         filterFile.close()
 
         print ("profanity: %s" % profanity)
@@ -93,16 +95,19 @@ class EDLCreator(object):
             subtitle = subtitle.strip()
             subtitle = subtitle.strip(' -?!.')
             
-            
+            # find matches, store timing in mutes array
             mutes = []
-        
             for word in profanity:
-                regex = r"\b" + re.escape(word) + r"\b"
+                regex = r"\b" + word + r"\b"
                 iterator = re.finditer(regex, subtitle, re.IGNORECASE)
-                for match in iterator:					
-                    mute = (match.start(), len(word))
-                    mutes.append(mute)   
-        
+                for match in iterator:
+                    #print "match: %s" % match
+                    if match.start() not in [x[0] for x in mutes]:
+                        mute = (match.start(), (match.end() - match.start()))
+                        mutes.append(mute)
+                    else:
+                        print 'skipping match because this word was already matched'
+            
             if mutes:
                 mutes = sorted(mutes, key=lambda mute:mute[0])
                 print "Subtitle: '%s'\n->Mute at %s" % (subtitle, mutes)

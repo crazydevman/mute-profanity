@@ -140,6 +140,7 @@ if mode == 'movie-details':
             else:
                 dialog.ok('XBMC', plugin.get_string(30306))
 else:
+    xbmc.log("Running %s v0.1. Using default listing." % ADDON_ID)
     movieDict = data.GetAllMovies()
     xbmc.log("movieDict: %s" % movieDict)
     win = xbmcgui.WindowDialog()

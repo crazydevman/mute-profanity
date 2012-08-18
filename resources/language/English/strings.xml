@@ -19,7 +19,8 @@
 
     <!--Messages-->
     <string id="30300">Mute Profanity</string>
-    <string id="30301">This will overwrite the existing mute profanity file.\nAre you sure you would like to do this?</string>
+    <string id="30301">This will overwrite the existing mute profanity file.
+    Are you sure you would like to do this?</string>
     <string id="30302">Do you want mute profanity for this movie?</string>
     <string id="30303">Success! You can now play the movie normally</string>
     <string id="30304">Could not find subtiles file, download one?</string>
