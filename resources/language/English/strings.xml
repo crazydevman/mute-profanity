@@ -4,17 +4,15 @@
     <string id="30100">General</string>
     <string id="30200">Advanced</string>
 
-    <!-- Settings -->
-    <string id="30110">Try to extract subtitles from mp4 files</string>
+    <!-- General Settings -->
     <string id="30120">Ask to download missing subtitles</string>
-    <string id="30130">Ask to import existing edl file</string>
     <string id="30140">Replace found profanity with ***** in original subtitle file</string>
-    <string id="30150">Create new subtitles file with only the context of found profanity</string>
     <string id="30160">Mute before and after (in MS)</string>
-    <string id="30210">Export edl file as Audacity label file</string>
+    
+    <!-- Advanced Settings -->
+    <string id="30210">Use mkvextract subtitles from MKV files</string>
+    <string id="30211">mkvextract path</string>
     <string id="30220">Debugging (restart script to apply)</string>
-    <string id="30230">Mplayer path</string>
-    <string id="30240">Mencoder path</string>
     <string id="30250">Mp4Box path</string>
 
     <!--Messages-->
