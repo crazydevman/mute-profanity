@@ -8,7 +8,7 @@ Since the subtitle file and not the audio itself is analyzed, you will notice th
 
 It's important to have an accurate subtitles file, with correct timings. If you notice that your subtitles show up too early or too late, the script will mute too early or too late as well. Even with max timing settings, the plugin will not mute before or after the subtitle is no longer displayed.
 
-After you download and install the application, the list of blocked words is found in the script directory under "resources"->"filter_file.txt". Each word should be on it's own line. Change this file as you see fit, but remember spaces matter. For example you might want to filter "asswipe" but not "class". You'll notice my filter file contains spaces for this reason (and they are important).
+After you download and install the application, the list of blocked words is found in the script directory under "resources"->"filter_file.txt". Each word should be on it's own line and you can use the '*' character to match any number of characters. Change this file as you see fit.
 
 How it works:
 XBMC has built-in the ability to read a EDL file (Edit Decision List) and process it accordingly. The script will create this file, which contains the timestamps of when mutes should occur. Again, this calculation is found from processing the subtitles file of the movie being 'edited'. My script currently only handles SRT subtitle files. If no SRT file could be found, the add-on will attempt to download one based on the name of the file from www.opensubtitles.org. If one could not be found, the script will fail. If you really, really need to mute a movie and it's not working, I suggest you download the SRT file separately, ensure that it works, then re-run my script to mute the profanity.
