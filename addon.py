@@ -77,10 +77,12 @@ def getSRT(fileLoc):
     srtFile = head + ".srt"
     if os.path.isfile(srtFile):
         return srtFile
-    if ext.lower() == 'mkv':
-        toolsDir = ?
+    if ext.lower() == 'mkv' and Addon.getSetting("usemkvextract"):
+        toolsDir = Addon.getSetting("mkvextractpath")
         subTrack = mkv.getSubTrack(fileLoc, toolsDir)
         if subTrack:
+            pDialog = xbmcgui.DialogProgress()
+            pDialog.create('XBMC', plugin.get_string(30320))
             if mkv.extractFromMKV(fileLoc, toolsDir, subTrack) == 0:
                 return srtFile
             else:
@@ -129,10 +131,12 @@ if mode == 'movie-details':
             dialog.ok(details['label'], plugin.get_string(30303))
     else:
         xbmc.log("No srt file!")
-        ret = dialog.yesno(details['label'], plugin.get_string(30304))
-        if ret:
+        download = True
+        if not Addon.getSetting("autodownload"):
+            download = dialog.yesno(details['label'], plugin.get_string(30304))
+        if download:
             pDialog = xbmcgui.DialogProgress()
-            ret = pDialog.create('XBMC', plugin.get_string(30305))
+            pDialog.create('XBMC', plugin.get_string(30305))
             xbmc.log('Downloading')
             try:
                 dl.FindSubtitles(fileLoc,"eng")

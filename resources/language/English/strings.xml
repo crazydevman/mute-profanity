@@ -5,15 +5,14 @@
     <string id="30200">Advanced</string>
 
     <!-- General Settings -->
-    <string id="30120">Ask to download missing subtitles</string>
-    <string id="30140">Replace found profanity with ***** in original subtitle file</string>
+    <string id="30120">Automatically download missing subtitles</string>
+    <string id="30140">Replace found profanity with **** in subtitle file</string>
     <string id="30160">Mute before and after (in MS)</string>
     
     <!-- Advanced Settings -->
-    <string id="30210">Use mkvextract subtitles from MKV files</string>
-    <string id="30211">mkvextract path</string>
-    <string id="30220">Debugging (restart script to apply)</string>
-    <string id="30250">Mp4Box path</string>
+    <string id="30210">Use MKVToolNix subtitles from MKV files</string>
+    <string id="30211">Folder containing mkvextract & mkvinfo</string>
+    <string id="30250">Debug Mode (extra logging)</string>
 
     <!--Messages-->
     <string id="30300">Mute Profanity</string>
@@ -24,4 +23,5 @@
     <string id="30304">Could not find subtiles file, download one?</string>
     <string id="30305">Downloading subtitles...</string>
     <string id="30306">Unable to download file.\nTry again later</string>
+    <string id="30320">Extracting subtitles from movie...</string>
 </strings>
