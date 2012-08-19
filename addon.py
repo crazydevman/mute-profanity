@@ -26,6 +26,7 @@ from EDLCreator import EDLCreator
 from config import plugin
 import JSONUtils as data
 import SubDownloader as dl
+import MKVSubExtract as mkv
 
 # magic; id of this plugin's instance - cast to integer
 _thisPlugin = int(sys.argv[1])
@@ -71,11 +72,21 @@ def existsEDL(srtLoc):
         return False
 
 def getSRT(fileLoc):
-    head = os.path.splitext(fileLoc)[0]
+    head, ext = os.path.splitext(fileLoc)
     xbmc.log("head: %s" % head)
     srtFile = head + ".srt"
     if os.path.isfile(srtFile):
         return srtFile
+    if ext.lower() == 'mkv':
+        toolsDir = ?
+        subTrack = mkv.getSubTrack(fileLoc, toolsDir)
+        if subTrack:
+            if mkv.extractFromMKV(fileLoc, toolsDir, subTrack) == 0:
+                return srtFile
+            else:
+                xbmc.log("Unable to extract subtitle from MKV file")
+        else:
+            xbmc.log("No subtitle track in the MKV file")
     #TODO: Could do more here to find a sub file
     return None
 
