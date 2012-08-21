@@ -27,6 +27,8 @@ from config import plugin
 import JSONUtils as data
 import SubDownloader as dl
 import MKVSubExtract as mkv
+import MP4SubExtract as mp4
+
 
 # magic; id of this plugin's instance - cast to integer
 _thisPlugin = int(sys.argv[1])
@@ -89,6 +91,20 @@ def getSRT(fileLoc):
                 xbmc.log("Unable to extract subtitle from MKV file")
         else:
             xbmc.log("No subtitle track in the MKV file")
+    if (ext.lower() == '.m4v' or ext.lower() == '.mp4') and Addon.getSetting("usemp4box"):
+    	xbmc.log ("I'm in.")
+        toolsDir = Addon.getSetting("mp4boxpath")
+        subTrack = mp4.getSubTrack(fileLoc, toolsDir)
+        if subTrack:
+            pDialog = xbmcgui.DialogProgress()
+            pDialog.create('XBMC', plugin.get_string(30320))
+            if mp4.extractFromMP4(fileLoc, toolsDir, subTrack) == 0:
+                return srtFile
+            else:
+                xbmc.log("Unable to extract subtitle from MP4 file")
+        else:
+            xbmc.log("No subtitle track in the MP4 file")
+    xbmc.log("File type does not contain SRT")
     #TODO: Could do more here to find a sub file
     return None
 
