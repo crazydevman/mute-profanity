@@ -53,7 +53,13 @@ def extractFromMP4(filePath, toolsDir, trackID):
     if not os.path.isdir(toolsDir):
         toolsDir = os.path.split(toolsDir)    
     
-    extractPath = os.path.join(toolsDir, "mp4box")
-    srtPath = os.path.splitext(filePath)[0] + ".srt"
-    return subprocess.call([extractPath, "-srt", str(trackID), filePath , srtPath])
+	extractPath = os.path.join(toolsDir, "mp4box")
+	srtPath = os.path.splitext(filePath)[0] + ".srt"
+	subprocess.call([extractPath, "-srt", str(trackID), filePath])
+	for filename in os.listdir(os.path.split(filePath)[0]):
+		if filename.endswith(".srt"):
+			oldsrt = os.path.split(filePath)[0] + "/" + filename
+			os.rename(oldsrt, srtPath)
+			break
+    return srtPath
 
