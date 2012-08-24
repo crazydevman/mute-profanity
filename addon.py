@@ -92,7 +92,6 @@ def getSRT(fileLoc):
         else:
             xbmc.log("No subtitle track in the MKV file")
     if (ext.lower() == '.m4v' or ext.lower() == '.mp4') and Addon.getSetting("usemp4box"):
-    	xbmc.log ("I'm in.")
         toolsDir = Addon.getSetting("mp4boxpath")
         subTrack = mp4.getSubTrack(fileLoc, toolsDir)
         if subTrack:
