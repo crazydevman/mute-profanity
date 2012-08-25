@@ -79,7 +79,7 @@ def getSRT(fileLoc):
     srtFile = head + ".srt"
     if os.path.isfile(srtFile):
         return srtFile
-    if ext.lower() == 'mkv' and Addon.getSetting("usemkvextract"):
+    if ext.lower() == 'mkv' and Addon.getSetting("usemkvextract") == 'true':
         toolsDir = Addon.getSetting("mkvextractpath")
         subTrack = mkv.getSubTrack(fileLoc, toolsDir)
         if subTrack:
@@ -91,7 +91,7 @@ def getSRT(fileLoc):
                 xbmc.log("Unable to extract subtitle from MKV file")
         else:
             xbmc.log("No subtitle track in the MKV file")
-    if (ext.lower() == '.m4v' or ext.lower() == '.mp4') and Addon.getSetting("usemp4box"):
+    if (ext.lower() == '.m4v' or ext.lower() == '.mp4') and Addon.getSetting("usemp4box") == 'true':
         toolsDir = Addon.getSetting("mp4boxpath")
         subTrack = mp4.getSubTrack(fileLoc, toolsDir)
         if subTrack:

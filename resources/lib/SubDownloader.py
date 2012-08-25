@@ -15,7 +15,8 @@ token = ""
            
 def FindSubtitles(videoname, lang):
         print "Contacting www.opensubtitles.org (" + videoname + ")"
-        filename = os.path.dirname(videoname) + "\\" + os.path.splitext(os.path.basename(videoname))[0] + ".srt"
+        filename = os.path.join (os.path.dirname(videoname), os.path.splitext(os.path.basename(videoname))[0] + ".srt")
+        print filename
         
         langs = lang.split(",")
         
@@ -26,7 +27,7 @@ def FindSubtitles(videoname, lang):
                         for item in data:
                                 if item['SubLanguageID'] == l and not found:
                                         print "Found", item['LanguageName'], "subtitle ..."
-                                        fullFile = os.path.dirname(videoname) + "\\" + item['SubFileName']
+                                        fullFile = os.path.join (os.path.dirname(videoname), item['SubFileName'])
                                         zipname = Download(item['ZipDownloadLink'], fullFile)
                                         print "Extracting subtitle ", filename
                                         Unzip(zipname, filename, item['SubFileName'])
