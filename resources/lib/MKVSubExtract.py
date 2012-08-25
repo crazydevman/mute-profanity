@@ -3,7 +3,6 @@ import re
 import threading
 import subprocess
 import select
-import fcntl
 
 class MKVExtractor:
     def __init__(self, toolsDir=''):
@@ -76,8 +75,8 @@ class MKVExtractor:
         '''Monitor Thread is running as long as the process is running'''
         outfile=self.proc.stdout 
         outfd=outfile.fileno() 
-        file_flags = fcntl.fcntl(outfd, fcntl.F_GETFL) 
-        fcntl.fcntl(outfd, fcntl.F_SETFL, file_flags | os.O_NDELAY) 
+        #file_flags = fcntl.fcntl(outfd, fcntl.F_GETFL) 
+        #fcntl.fcntl(outfd, fcntl.F_SETFL, file_flags | os.O_NDELAY) 
 
         while not self.proc.poll(): 
             ready = select.select([outfd],[],[]) # wait for input 

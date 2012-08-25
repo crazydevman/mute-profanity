@@ -76,15 +76,20 @@ def existsEDL(srtLoc):
 def getSRT(fileLoc):
     head, ext = os.path.splitext(fileLoc)
     xbmc.log("head: %s" % head)
+    
     srtFile = head + ".srt"
     if os.path.isfile(srtFile):
         return srtFile
-    if ext.lower() == 'mkv' and Addon.getSetting("usemkvextract") == 'true':
+    
+    if ext.lower() == '.mkv' and Addon.getSetting("usemkvextract") == "true":
+        xbmc.log("Will attempt to use mkvextract...")
         toolsDir = Addon.getSetting("mkvextractpath")
-        subTrack = mkv.getSubTrack(fileLoc, toolsDir)
+        extract = mkv.MKVExtractor(toolsDir)
+        subTrack = extract.getSubTrack(fileLoc, toolsDir)
         if subTrack:
             pDialog = xbmcgui.DialogProgress()
             pDialog.create('XBMC', plugin.get_string(30320))
+            extract.startExtract(fileLoc, subTrack)
             if mkv.extractFromMKV(fileLoc, toolsDir, subTrack) == 0:
                 return srtFile
             else:
