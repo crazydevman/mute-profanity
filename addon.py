@@ -92,17 +92,18 @@ def getSRT(fileLoc):
         else:
             xbmc.log("No subtitle track in the MKV file")
     if (ext.lower() == '.m4v' or ext.lower() == '.mp4') and Addon.getSetting("usemp4box") == 'true':
-			toolsDir = Addon.getSetting("mp4boxpath")
-			subTrack = mp4.getSubTrack(fileLoc, toolsDir)
-			if subTrack:
-				pDialog = xbmcgui.DialogProgress()
-				pDialog.create('XBMC', plugin.get_string(30320))
-				if mp4.extractFromMP4(fileLoc, toolsDir, subTrack) == 0:
-					return srtFile
-				else:
-					xbmc.log("Unable to extract subtitle from MP4 file")
-			else:
-				xbmc.log("No subtitle track in the MP4 file")
+        toolsDir = Addon.getSetting("mp4boxpath")
+        subTrack = mp4.getSubTrack(fileLoc, toolsDir)
+        if subTrack:
+            pDialog = xbmcgui.DialogProgress()
+            pDialog.create('XBMC', plugin.get_string(30320))
+            if mp4.extractFromMP4(fileLoc, toolsDir, subTrack) == 0:
+                return srtFile
+            else:
+                xbmc.log("Unable to extract subtitle from MP4 file")
+        else:
+            xbmc.log("No subtitle track in the MP4 file")
+    xbmc.log("File type does not contain SRT")
     #TODO: Could do more here to find a sub file
     return None
 

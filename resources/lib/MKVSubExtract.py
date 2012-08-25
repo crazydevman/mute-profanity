@@ -1,67 +1,102 @@
 import os
 import re
+import threading
 import subprocess
+import select
+import fcntl
 
-def getSubTrack(filePath, toolsDir):
-    
-    if not os.path.isdir(toolsDir):
-        toolsDir = os.path.split(toolsDir)
-    
-    infoPath = os.path.join(toolsDir, "mkvinfo")
-    output = subprocess.check_output([infoPath, filePath])
-    
-    tracks = {}
-    trackNumber = None
-    for line in output.splitlines():
-        r = re.search('[+] Track number: (\d+)', line)
-        if r:
-            trackNumber = int(r.group(1))
-            trackID = trackNumber
-            r = re.search('track ID .*: (\d+)', line)
-            if r:
-                trackID = int(r.group(1))
-            tracks[trackNumber] = { 'TID': trackID }
-            continue
+class MKVExtractor:
+    def __init__(self, toolsDir=''):
+        self.toolsDir = toolsDir
+        self.progress = 0;
 
-        r = re.search('[+] Track type: (.+)', line)
-        if r:
-            trackType = r.group(1)
-            tracks[trackNumber]['type'] = trackType
-            continue
-
-        r = re.search('[+] Language: (.+)', line)
-        if r:
-            language = r.group(1)
-            tracks[trackNumber]['language'] = language
-            continue
+    def getSubTrack(self, filePath):
+        '''Uses mkvinfo to find the track that contains the subtitles'''
+        infoPath = os.path.join(self.toolsDir, "mkvinfo")
+        proc = subprocess.Popen([infoPath, filePath], stdout=subprocess.PIPE)
+        output = proc.communicate()[0]
         
-        r = re.search('[+] Codec ID: (.+)', line)
-        if r:
-            codec = r.group(1)
-            tracks[trackNumber]['codec'] = codec
-            continue
+        tracks = {}
+        trackNumber = None
+        for line in output.splitlines():
+            r = re.search('[+] Track number: (\d+)', line)
+            if r:
+                trackNumber = int(r.group(1))
+                trackID = trackNumber
+                r = re.search('track ID .*: (\d+)', line)
+                if r:
+                    trackID = int(r.group(1))
+                tracks[trackNumber] = { 'TID': trackID }
+                continue
     
-    subTrackID = None
-    for track in tracks.values():
-        if track['type'] != 'subtitles':
-            continue
-        if 'language' in track and track['language'] != 'eng':
-            continue
-        if 'codec' in track and track['codec'] != 'S_TEXT/UTF8':
-            continue
-        subTrackID = track['TID']
-        break
+            r = re.search('[+] Track type: (.+)', line)
+            if r:
+                trackType = r.group(1)
+                tracks[trackNumber]['type'] = trackType
+                continue
+    
+            r = re.search('[+] Language: (.+)', line)
+            if r:
+                language = r.group(1)
+                tracks[trackNumber]['language'] = language
+                continue
             
-    if subTrackID != None:
-        print 'Found subtitle track: %d' % subTrackID
-    return subTrackID
-
-def extractFromMKV(filePath, toolsDir, trackID):
+            r = re.search('[+] Codec ID: (.+)', line)
+            if r:
+                codec = r.group(1)
+                tracks[trackNumber]['codec'] = codec
+                continue
+        
+        subTrackID = None
+        for track in tracks.values():
+            if track['type'] != 'subtitles':
+                continue
+            if 'language' in track and track['language'] != 'eng':
+                continue
+            if 'codec' in track and track['codec'] != 'S_TEXT/UTF8':
+                continue
+            subTrackID = track['TID']
+            break
+        
+        return subTrackID
     
-    if not os.path.isdir(toolsDir):
-        toolsDir = os.path.split(toolsDir)    
-    
-    extractPath = os.path.join(toolsDir, "mkvextract")
-    srtPath = os.path.splitext(filePath)[0] + ".srt"
-    return subprocess.call([extractPath, "tracks", filePath, str(trackID) + ':' + srtPath])
+    def startExtract(self, filePath, trackID):
+        extractPath = os.path.join(self.toolsDir, "mkvextract")
+        srtPath = os.path.splitext(filePath)[0] + ".srt"
+        args = [extractPath, "tracks", filePath, str(trackID) + ':' + srtPath]
+        
+        self.proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT)
+        
+        self.mThread = threading.Thread(target=self.monitorThread)
+        self.mThread.setDaemon(True)
+        self.mThread.start()
+        
+    def monitorThread(self):
+        '''Monitor Thread is running as long as the process is running'''
+        outfile=self.proc.stdout 
+        outfd=outfile.fileno() 
+        file_flags = fcntl.fcntl(outfd, fcntl.F_GETFL) 
+        fcntl.fcntl(outfd, fcntl.F_SETFL, file_flags | os.O_NDELAY) 
 
+        while not self.proc.poll(): 
+            ready = select.select([outfd],[],[]) # wait for input 
+            if outfd in ready[0]: 
+                outchunk = outfile.read() 
+                if outchunk == '': 
+                    break 
+            select.select([],[],[],.1) # give a little time for buffers to fill 
+
+            # extract percentages from string "Progress: n%"
+            r = re.search('Progress:\s+(\d+)', outchunk)
+            if r:
+                self.progress = int(r.group(1))
+    
+    def cancelExtract(self):
+        returnCode = self.proc.poll()
+        if returnCode is not None:
+            return
+        self.proc.terminate()
+        
+    def isRunning(self):
+        return self.mThread.isAlive()
