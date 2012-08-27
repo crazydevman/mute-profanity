@@ -27,4 +27,6 @@ Are you sure you would like to do this?</string>
     <string id="30306">Unable to download file.
 Try again later</string>
     <string id="30320">Extracting subtitles from movie...</string>
+    <string id="30321">Problem extracting subtitles from movie.
+Check log for details</string>
 </strings>

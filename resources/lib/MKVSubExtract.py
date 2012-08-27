@@ -3,8 +3,9 @@ import re
 import threading
 import subprocess
 
-def log(string):
-    print string
+def log(*args):
+    for arg in args:
+        print arg
 
 class MKVExtractor:
     def __init__(self, toolsDir=''):
@@ -65,11 +66,11 @@ class MKVExtractor:
     def startExtract(self, filePath, trackID):
         self.progress = 0
         extractPath = os.path.join(self.toolsDir, "mkvextract")
-        srtPath = os.path.splitext(filePath)[0] + ".srt"
-        args = [extractPath, "tracks", filePath, str(trackID) + ':' + srtPath]
+        self.srtPath = os.path.splitext(filePath)[0] + ".srt"
+        args = [extractPath, "tracks", filePath, str(trackID) + ':' + self.srtPath]
         log('executing args: %s' % args)
         
-        self.proc = subprocess.Popen(args, stdout=subprocess.PIPE,shell=True)
+        self.proc = subprocess.Popen(args, stdout=subprocess.PIPE,shell=True, universal_newlines=True)
         
         self.mThread = threading.Thread(target=self.monitorThread)
         self.mThread.setDaemon(True)
@@ -77,42 +78,37 @@ class MKVExtractor:
         
     def monitorThread(self):
         '''Monitor Thread is running as long as the process is running'''
-        outfile=self.proc.stdout 
-        #file_flags = fcntl.fcntl(outfd, fcntl.F_GETFL) 
-        #fcntl.fcntl(outfd, fcntl.F_SETFL, file_flags | os.O_NDELAY)
+        outfile=self.proc.stdout
 
-        log("Starting")
+        log("Starting to read stdout from mkvextract")
         while not self.proc.poll(): 
-            c = outfile.read(1).encode('string-escape')
-            c = str(c)
-            log('char recieved: %s' % c)
-            if c == '\n':
-                
-            #if len(c.strip()) == 0:
-            #    log("Breaking")
-            #    break
-            #ready = select.select([outfd],[],[]) # wait for input 
-            #if outfd in ready[0]: 
-            #    outchunk = outfile.read() 
-            #    if outchunk == '': 
-            #        break 
-            #select.select([],[],[],.1) # give a little time for buffers to fill 
+            line = outfile.readline()
+            #log('line received: %s' % line)
+            if not len(line):
+                break
 
             # extract percentages from string "Progress: n%"
-            #r = re.search('Progress:\s+(\d+)', outchunk)
-            #if r:
-            #    self.progress = int(r.group(1))
+            r = re.search('Progress:\s+(\d+)', line)
+            if r:
+                self.progress = int(r.group(1))
             
         log("Ending execution")
+        try:
+            self.proc.terminate()
+        except:
+            pass
     
     def cancelExtract(self):
         returnCode = self.proc.poll()
         if returnCode is not None:
             return
-        self.proc.terminate()
+        self.proc.kill()
         
     def isRunning(self):
         return self.mThread.isAlive()
     
-    def completeSuccess(self):
-        return self.proc.poll() == 0
+    def getSubFile(self):
+        if self.progress != 100:
+            if self.proc.poll() == 0:
+                self.srtPath
+        return self.srtPath

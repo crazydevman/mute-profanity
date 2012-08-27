@@ -21,20 +21,20 @@ def FindSubtitles(videoname, lang):
         langs = lang.split(",")
         
         data = GetSubtitles(videoname);
-        found = False
         if data:
                 for l in langs:
                         for item in data:
-                                if item['SubLanguageID'] == l and not found:
+                                if item['SubLanguageID'] == l:
                                         print "Found", item['LanguageName'], "subtitle ..."
                                         fullFile = os.path.join (os.path.dirname(videoname), item['SubFileName'])
                                         zipname = Download(item['ZipDownloadLink'], fullFile)
                                         print "Extracting subtitle ", filename
                                         Unzip(zipname, filename, item['SubFileName'])
                                         os.remove(zipname)
-                                        found = True
-        else:
-                print "No Subtitles found"
+                                        return filename
+        print "No Subtitles found"
+        return None
+        
                                 
 def GetSubtitles(moviepath):
         #print server.LogIn("","","","SubIt")['status']

@@ -11,7 +11,6 @@ import xbmc
 import xbmcaddon
 import xbmcplugin
 import xbmcgui
-import traceback
 
 ADDON_ID = 'plugin.video.mute-profanity'
 Addon = xbmcaddon.Addon(id=ADDON_ID)
@@ -25,10 +24,7 @@ from UIManager import UIManager
 from EDLCreator import EDLCreator
 from config import plugin
 import JSONUtils as data
-import SubDownloader as dl
-import MKVSubExtract as mkv
-import MP4SubExtract as mp4
-
+import SubFinder as subf
 
 # magic; id of this plugin's instance - cast to integer
 _thisPlugin = int(sys.argv[1])
@@ -37,7 +33,7 @@ _thisPlugin = int(sys.argv[1])
 ui = UIManager(_thisPlugin)
 
 #setup loggers
-mkv.log = xbmc.log
+subf.log = xbmc.log
 
 def getInitialListing():
     """
@@ -76,54 +72,6 @@ def existsEDL(srtLoc):
     except:
         return False
 
-def getSRT(fileLoc):
-    head, ext = os.path.splitext(fileLoc)
-    xbmc.log("head: %s" % head)
-    
-    srtFile = head + ".srt"
-    if os.path.isfile(srtFile):
-        return srtFile
-    
-    if ext.lower() == '.mkv' and Addon.getSetting("usemkvextract") == "true":
-        xbmc.log("Will attempt to use mkvextract...")
-        extract = mkv.MKVExtractor() #Addon.getSetting("mkvextractpath"))
-        subTrack = None
-        try:
-            subTrack = extract.getSubTrack(fileLoc)
-        except:
-            xbmc.log('Error attempting to get the subtitle track')
-            
-        if subTrack:
-            pDialog = xbmcgui.DialogProgress()
-            pDialog.create('XBMC', plugin.get_string(30320))
-            extract.startExtract(fileLoc, subTrack)
-            while extract.isRunning():
-                if pDialog.iscanceled():
-                    extract.cancelExtract()
-                    break
-                pDialog.update(extract.progress)
-            if extract.completeSuccess():
-                return srtFile
-            else:
-                xbmc.log("Unable to extract subtitle from MKV file")
-        else:
-            xbmc.log("No subtitle track in the MKV file")
-    if (ext.lower() == '.m4v' or ext.lower() == '.mp4') and Addon.getSetting("usemp4box") == 'true':
-        toolsDir = Addon.getSetting("mp4boxpath")
-        subTrack = mp4.getSubTrack(fileLoc, toolsDir)
-        if subTrack:
-            pDialog = xbmcgui.DialogProgress()
-            pDialog.create('XBMC', plugin.get_string(30320))
-            if mp4.extractFromMP4(fileLoc, toolsDir, subTrack) == 0:
-                return srtFile
-            else:
-                xbmc.log("Unable to extract subtitle from MP4 file")
-        else:
-            xbmc.log("No subtitle track in the MP4 file")
-    xbmc.log("File type does not contain SRT")
-    #TODO: Could do more here to find a sub file
-    return None
-
 def createEDL():
     try:
         filterLoc = os.path.join( BASE_RESOURCE_PATH, "filter.txt" )
@@ -156,36 +104,12 @@ if mode == 'movie-details':
         sys.exit()
     
     fileLoc = details['file']
-    srtLoc = getSRT(fileLoc)
+    finder = subf.SubFinder(Addon, plugin)
+    srtLoc = finder.getSRT(fileLoc)
     if srtLoc:
-        xbmc.log("Found srt file: %s" % srtLoc)
+        xbmc.log("Using srt file: %s" % srtLoc)
         if createEDL():
             dialog.ok(details['label'], plugin.get_string(30303))
-    else:
-        xbmc.log("No srt file!")
-        download = True
-        if not Addon.getSetting("autodownload"):
-            download = dialog.yesno(details['label'], plugin.get_string(30304))
-        if download:
-            pDialog = xbmcgui.DialogProgress()
-            pDialog.create('XBMC', plugin.get_string(30305))
-            xbmc.log('Downloading')
-            try:
-                dl.FindSubtitles(fileLoc,"eng")
-                srtLoc = getSRT(fileLoc)
-            except:
-                print traceback.format_exc()
-                dialog.ok('XBMC', plugin.get_string(30306))
-            
-            if (pDialog.iscanceled()): 
-                sys.exit()
-            pDialog.close()
-            
-            if srtLoc:
-                if createEDL():
-                    dialog.ok(details['label'], plugin.get_string(30303))
-            else:
-                dialog.ok('XBMC', plugin.get_string(30306))
 else:
     xbmc.log("Running %s v0.1. Using default listing." % ADDON_ID)
     movieDict = data.GetAllMovies()
