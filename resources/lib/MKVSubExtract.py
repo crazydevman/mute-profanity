@@ -2,17 +2,20 @@ import os
 import re
 import threading
 import subprocess
-import select
+
+def log(string):
+    print string
 
 class MKVExtractor:
     def __init__(self, toolsDir=''):
         self.toolsDir = toolsDir
-        self.progress = 0;
+        self.progress = 0
 
     def getSubTrack(self, filePath):
         '''Uses mkvinfo to find the track that contains the subtitles'''
         infoPath = os.path.join(self.toolsDir, "mkvinfo")
-        proc = subprocess.Popen([infoPath, filePath], stdout=subprocess.PIPE)
+        log('path to executable mkvinfo: %s' % infoPath)
+        proc = subprocess.Popen([infoPath, filePath], stdout=subprocess.PIPE, shell=True)
         output = proc.communicate()[0]
         
         tracks = {}
@@ -60,12 +63,13 @@ class MKVExtractor:
         return subTrackID
     
     def startExtract(self, filePath, trackID):
+        self.progress = 0
         extractPath = os.path.join(self.toolsDir, "mkvextract")
         srtPath = os.path.splitext(filePath)[0] + ".srt"
         args = [extractPath, "tracks", filePath, str(trackID) + ':' + srtPath]
+        log('executing args: %s' % args)
         
-        self.proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT)
+        self.proc = subprocess.Popen(args, stdout=subprocess.PIPE,shell=True)
         
         self.mThread = threading.Thread(target=self.monitorThread)
         self.mThread.setDaemon(True)
@@ -74,22 +78,32 @@ class MKVExtractor:
     def monitorThread(self):
         '''Monitor Thread is running as long as the process is running'''
         outfile=self.proc.stdout 
-        outfd=outfile.fileno() 
         #file_flags = fcntl.fcntl(outfd, fcntl.F_GETFL) 
-        #fcntl.fcntl(outfd, fcntl.F_SETFL, file_flags | os.O_NDELAY) 
+        #fcntl.fcntl(outfd, fcntl.F_SETFL, file_flags | os.O_NDELAY)
 
+        log("Starting")
         while not self.proc.poll(): 
-            ready = select.select([outfd],[],[]) # wait for input 
-            if outfd in ready[0]: 
-                outchunk = outfile.read() 
-                if outchunk == '': 
-                    break 
-            select.select([],[],[],.1) # give a little time for buffers to fill 
+            c = outfile.read(1).encode('string-escape')
+            c = str(c)
+            log('char recieved: %s' % c)
+            if c == '\n':
+                
+            #if len(c.strip()) == 0:
+            #    log("Breaking")
+            #    break
+            #ready = select.select([outfd],[],[]) # wait for input 
+            #if outfd in ready[0]: 
+            #    outchunk = outfile.read() 
+            #    if outchunk == '': 
+            #        break 
+            #select.select([],[],[],.1) # give a little time for buffers to fill 
 
             # extract percentages from string "Progress: n%"
-            r = re.search('Progress:\s+(\d+)', outchunk)
-            if r:
-                self.progress = int(r.group(1))
+            #r = re.search('Progress:\s+(\d+)', outchunk)
+            #if r:
+            #    self.progress = int(r.group(1))
+            
+        log("Ending execution")
     
     def cancelExtract(self):
         returnCode = self.proc.poll()
@@ -99,3 +113,6 @@ class MKVExtractor:
         
     def isRunning(self):
         return self.mThread.isAlive()
+    
+    def completeSuccess(self):
+        return self.proc.poll() == 0

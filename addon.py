@@ -36,6 +36,9 @@ _thisPlugin = int(sys.argv[1])
 #create helper classes
 ui = UIManager(_thisPlugin)
 
+#setup loggers
+mkv.log = xbmc.log
+
 def getInitialListing():
     """
     Creates a listing that XBMC can display as a directory
@@ -83,14 +86,23 @@ def getSRT(fileLoc):
     
     if ext.lower() == '.mkv' and Addon.getSetting("usemkvextract") == "true":
         xbmc.log("Will attempt to use mkvextract...")
-        toolsDir = Addon.getSetting("mkvextractpath")
-        extract = mkv.MKVExtractor(toolsDir)
-        subTrack = extract.getSubTrack(fileLoc, toolsDir)
+        extract = mkv.MKVExtractor() #Addon.getSetting("mkvextractpath"))
+        subTrack = None
+        try:
+            subTrack = extract.getSubTrack(fileLoc)
+        except:
+            xbmc.log('Error attempting to get the subtitle track')
+            
         if subTrack:
             pDialog = xbmcgui.DialogProgress()
             pDialog.create('XBMC', plugin.get_string(30320))
             extract.startExtract(fileLoc, subTrack)
-            if mkv.extractFromMKV(fileLoc, toolsDir, subTrack) == 0:
+            while extract.isRunning():
+                if pDialog.iscanceled():
+                    extract.cancelExtract()
+                    break
+                pDialog.update(extract.progress)
+            if extract.completeSuccess():
                 return srtFile
             else:
                 xbmc.log("Unable to extract subtitle from MKV file")
