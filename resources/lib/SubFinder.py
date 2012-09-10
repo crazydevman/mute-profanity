@@ -9,7 +9,9 @@ import traceback
 
 import MKVSubExtract as mkv
 import MP4SubExtract as mp4
-import SubDownloader as dl
+import DownloadManager as dl
+import sub2srt
+import ssatool
 
 import xbmcgui
 
@@ -32,17 +34,29 @@ class SubFinder():
         head, ext = os.path.splitext(fileLoc)
         log("head: %s" % head)
         
-        srtFile = head + ".SRT"
-        if os.path.isfile(srtFile):
-            log("Found existing SRT file: %s" % srtFile)
-            return srtFile
+        for fname in os.listdir(os.path.dirname(fileLoc)):
+            if fname.startswith(head) and os.path.splitext(fname).lower() == ".srt":
+                log("Found existing SRT file: %s" % fname)
+                return fname
+                
+        log("No existing srt file was found")
         
-        srtFile = head + ".srt"
-        if os.path.isfile(srtFile):
-            log("Found existing SRT file: %s" % srtFile)
-            return srtFile
+        for fname in os.listdir(os.path.dirname(fileLoc)):
+            extensions = ['.ssa', '.ass']
+            if fname.startswith(head) and os.path.splitext(fname).lower() in extensions:
+                log("Found existing Substation Alpha file: %s" % fname)
+                try:
+                    return ssatool.main(fname)
+                except:
+                    log("Error attempting to convert SubStation Alpha file")
         
-        log("No external srt file was found")
+        for fname in os.listdir(os.path.dirname(fileLoc)):
+            if fname.startswith(head) and os.path.splitext(fname).lower() == ".sub":
+                log("Found existing SUB file: %s, converting to SRT" % fname)
+                try:
+                    return sub2srt.convert(fname)
+                except:
+                    log("Error attempting to convert sub file")
         
         extractor = None
         if ext.lower() == '.mkv' and self.Addon.getSetting("usemkvextract") == "true":
@@ -74,7 +88,8 @@ class SubFinder():
                         return None
                     pDialog.update(extractor.progress)
                     time.sleep(.1)
-                    
+                
+                pDialog.close()    
                 srtFile = extractor.getSubFile()
                 if srtFile:
                     return srtFile
@@ -91,18 +106,17 @@ class SubFinder():
             pDialog = xbmcgui.DialogProgress()
             pDialog.create('XBMC', self.plugin.get_string(30305))
             log('Attempting to download subtitle file from the internet')
-            srtFile = None
-            try:
-                srtFile = dl.FindSubtitles(fileLoc,"eng")
-            except:
-                log(traceback.format_exc())
+            extractor = dl.Manager()
+            extractor.startDL(fileLoc, "eng")
+            while (extractor.isRunning()):
+                if (pDialog.iscanceled()):
+                    log("Dialog was cancelled, Stopping download")
+                    pDialog.close()
+                    return None
+                time.sleep(.1)
             
-            if (pDialog.iscanceled()): 
-                log("TODO: Dialog was cancelled, we should have stopped")
-                pDialog.close()
-                return None
-                
             pDialog.close()
+            srtFile = extractor.getSubFile()
             if srtFile:
                 log("Successfully downloaded subtitle file: %s" % srtFile)
                 return srtFile

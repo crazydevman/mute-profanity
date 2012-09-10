@@ -1,4 +1,4 @@
-	<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="30100">
         <setting id="autodownload" type = "bool" label="30120" default="false" />

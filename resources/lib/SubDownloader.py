@@ -1,7 +1,10 @@
+#!/usr/bin/env python
 
 import struct
 import os
 import string
+import sys
+import traceback
 
 from zipfile import *
 from xmlrpclib import ServerProxy
@@ -14,7 +17,7 @@ server = ServerProxy("http://api.opensubtitles.org/xml-rpc")
 token = ""
            
 def FindSubtitles(videoname, lang):
-        print "Contacting www.opensubtitles.org (" + videoname + ")"
+        print >> sys.stderr, "Contacting www.opensubtitles.org (" + videoname + ")"
         filename = os.path.join (os.path.dirname(videoname), os.path.splitext(os.path.basename(videoname))[0] + ".srt")
         print filename
         
@@ -25,19 +28,19 @@ def FindSubtitles(videoname, lang):
                 for l in langs:
                         for item in data:
                                 if item['SubLanguageID'] == l:
-                                        print "Found", item['LanguageName'], "subtitle ..."
+                                        print >> sys.stderr, "Found", item['LanguageName'], "subtitle ..."
                                         fullFile = os.path.join (os.path.dirname(videoname), item['SubFileName'])
                                         zipname = Download(item['ZipDownloadLink'], fullFile)
-                                        print "Extracting subtitle ", filename
+                                        print >> sys.stderr, "Extracting subtitle ", filename
                                         Unzip(zipname, filename, item['SubFileName'])
                                         os.remove(zipname)
                                         return filename
-        print "No Subtitles found"
+        print >> sys.stderr, "No Subtitles found"
         return None
         
                                 
 def GetSubtitles(moviepath):
-        #print server.LogIn("","","","SubIt")['status']
+        #print >> sys.stderr, server.LogIn("","","","SubIt")['status']
         token = server.LogIn("", "", "", "SubIt")['token']
                 
         moviebytesize = os.path.getsize(moviepath) 
@@ -50,17 +53,14 @@ def GetSubtitles(moviepath):
         if (data == False):
                 basename = os.path.basename(moviepath)
                 name = os.path.splitext(basename)[0]
-                print "Could not find by hash ..." 
-                print "Searching by name: \"" + name + "\"" 
+                print >> sys.stderr, "Could not find by hash ..." 
+                print >> sys.stderr, "Searching by name: \"" + name + "\"" 
                 movieInfo = {'sublanguageid' : 'eng', 'query' : name}
                 movies = [movieInfo]
                 data = server.SearchSubtitles(token, movies)['data']
                 
         server.LogOut()
-        
         return data
-        
-        
 
 def Compute(name): 
         try:
@@ -127,12 +127,34 @@ def istext(s):
 def Download(url, filename):
         req = Request(url)
         f = urlopen(req)
-        print "downloading " + url
-        print "save to " + filename + ".zip"
+        print >> sys.stderr, "downloading " + url
+        print >> sys.stderr, "save to " + filename + ".zip"
         # Open our local file for writing
         local_file = open(filename + ".zip", "w" + "b")
         #Write to our local file
         local_file.write(f.read())
         local_file.close()
-        print "file " + filename + ".zip created"
+        print >> sys.stderr, "file " + filename + ".zip created"
         return filename + ".zip"
+
+def main():
+    args = sys.argv
+    if len(args) < 3:
+        print "Usage: file language"
+        sys.exit(1)
+    
+    srtFile = None
+    try:
+        srtFile = FindSubtitles(args[1], args[2])
+    except:
+        print >> sys.stderr, traceback.format_exc()
+        sys.exit(3)
+        
+    if not srtFile:
+        sys.exit(2)
+        
+    print srtFile
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()
