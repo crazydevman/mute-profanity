@@ -3,6 +3,8 @@ asses
 asshole*
 bastard*
 bitch*
+breast
+breasts
 christ
 clit
 clitoris
@@ -18,10 +20,12 @@ ejaculat*
 fag
 fags
 faggot*
-fart*
+fart
+farts
 *fuck*
 god
 hell
+humping
 jesus
 labia
 nigger*
@@ -34,5 +38,6 @@ pussies
 pussy
 *shit*
 slut*
+son of a
 tit
 tits
