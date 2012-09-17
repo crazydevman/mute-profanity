@@ -95,7 +95,7 @@ class EDLCreator(object):
             subtitle = subtitle.strip()
             subtitle = subtitle.strip(' -?!.')
             
-            # find matches, store timing in mutes array
+            # find matches, store timing and muted word in mutes array
             mutes = []
             for word in profanity:
                 regex = r"\b" + word + r"\b"
