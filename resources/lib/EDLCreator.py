@@ -95,7 +95,7 @@ class EDLCreator(object):
             subtitle = subtitle.strip()
             subtitle = subtitle.strip(' -?!.')
             
-            # find matches, store timing in mutes array
+            # find matches, store timing and muted word in mutes array
             mutes = []
             for word in profanity:
                 regex = r"\b" + word + r"\b"
@@ -103,7 +103,7 @@ class EDLCreator(object):
                 for match in iterator:
                     #print "match: %s" % match
                     if match.start() not in [x[0] for x in mutes]:
-                        mute = (match.start(), (match.end() - match.start()))
+                        mute = (match.start(), (match.end() - match.start()), match.group(0))
                         mutes.append(mute)
                     else:
                         print 'skipping match because this word was already matched'
@@ -127,7 +127,7 @@ class EDLCreator(object):
                 for mute in mutes:
                     mStart = max(0, mute[0] * durationPerChar - self.safety) + tStart
                     mFinish = min((mute[1] * durationPerChar) + (tStart + mute[0] * durationPerChar) + self.safety, tFinish)
-                    edlFile.write(str(mStart) + "\t" + str(mFinish) + "\t1\n");
+                    edlFile.write(str(mStart) + "\t" + str(mFinish) + "\t1\t# Muted:" + mute[2] +"\n");
             
         # close files    
         edlFile.close()
