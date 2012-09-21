@@ -22,6 +22,7 @@ sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 
 from UIManager import UIManager
 from EDLCreator import EDLCreator
+from SRTMuteReplace import NewSRTCreator
 from config import plugin
 import JSONUtils as data
 import SubFinder as subf
@@ -72,6 +73,13 @@ def existsEDL(srtLoc):
     except:
         return False
 
+def existsSRTbck(srtLoc):
+	try:
+		srtbck = srtLoc + ".bck"
+		return os.path.isfile(srtbck)
+	except:
+		return False
+
 def createEDL():
     try:
         filterLoc = os.path.join( BASE_RESOURCE_PATH, "filter.txt" )
@@ -83,6 +91,13 @@ def createEDL():
             if not ret:
                 return False
         edl.createEDL()
+        if Addon.getSetting("editsrt") == "true":
+        	srt = NewSRTCreator(srtLoc, filterLoc)
+        	if existsSRTbck(srtLoc):
+        		os.rename(srtLoc + '.bck', srtLoc)
+        	if srt.createNewSRT():
+        		os.rename(srtLoc, srtLoc + '.bck')
+        		os.rename(srtLoc[:-3] + "tmp", srtLoc)
         return True
     except:
         return False
