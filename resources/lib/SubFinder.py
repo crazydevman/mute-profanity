@@ -12,6 +12,7 @@ import MP4SubExtract as mp4
 import DownloadManager as dl
 import sub2srt
 import ssatool
+import smi2srt
 
 import xbmcgui
 
@@ -34,24 +35,38 @@ class SubFinder():
         head, ext = os.path.splitext(fileLoc)
         log("head: %s" % head)
         
+        #First check existing subtitle files, especially existing SRT
         for fname in os.listdir(os.path.dirname(fileLoc)):
-            if fname.startswith(head) and os.path.splitext(fname).lower() == ".srt":
+            if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".srt":
                 log("Found existing SRT file: %s" % fname)
                 return fname
                 
-        log("No existing srt file was found")
+        log("No existing SRT file was found")
         
+        #Check other subtitle formats, converting them to SRT, starting with SubStation Alpha
+        extensions = ['.ssa', '.ass']
         for fname in os.listdir(os.path.dirname(fileLoc)):
-            extensions = ['.ssa', '.ass']
-            if fname.startswith(head) and os.path.splitext(fname).lower() in extensions:
+            if fname.startswith(head) and os.path.splitext(fname)[1].lower() in extensions:
                 log("Found existing Substation Alpha file: %s" % fname)
                 try:
                     return ssatool.main(fname)
                 except:
                     log("Error attempting to convert SubStation Alpha file")
-        
+                    
+        #Check for SMI files
         for fname in os.listdir(os.path.dirname(fileLoc)):
-            if fname.startswith(head) and os.path.splitext(fname).lower() == ".sub":
+            if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".smi":
+                log("Found existing SMI file: %s" % fname)
+                try:
+                    srtFile = smi2srt.convertSMI(fname)
+                    if srtFile:
+                        return srtFile
+                except:
+                    log("Error attempting to convert SubStation Alpha file")
+        
+        #Check for sub files last
+        for fname in os.listdir(os.path.dirname(fileLoc)):
+            if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".sub":
                 log("Found existing SUB file: %s, converting to SRT" % fname)
                 try:
                     return sub2srt.convert(fname)

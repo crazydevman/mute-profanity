@@ -1,0 +1,4 @@
+{0}{100}{y:i}italic text here
+{110}{200}{y:b}bold text here
+{210}{300}{Y:u}underlined text here
+{310}{400}{C:$0000FF}red text here
