@@ -3,4 +3,4 @@
 .DS_Store
 resources/ignore/*
 
-mute-profanity.komodoproject
+*.komodoproject

@@ -3,13 +3,10 @@ asses
 asshole*
 bastard*
 bitch*
-breast
-breasts
 christ
 clit
 clitoris
-cock
-cocksuck*
+cock*
 condum
 cumshot
 cunt*
@@ -20,8 +17,6 @@ ejaculat*
 fag
 fags
 faggot*
-fart
-farts
 *fuck*
 god
 hell
@@ -32,12 +27,7 @@ nigger*
 orgas*
 piss*
 porn*
-prick
-pricks
 pussies
 pussy
 *shit*
 slut*
-son of a
-tit
-tits

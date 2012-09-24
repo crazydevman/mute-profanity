@@ -6,8 +6,12 @@ Created on Apr 7, 2012
 
 import sys
 import re
+import os
 
-class EDLCreator(object):
+MUTE_PROFANITY_MARKER_START = "###### This section is automatically maintained by the Mute Profanity plugin ######"
+MUTE_PROFANITY_MARKER_END = "###### END Mute Profanity plugin section ######"
+
+class EDLManager(object):
     '''
     classdocs
     '''
@@ -24,15 +28,40 @@ class EDLCreator(object):
     def setEDLName(self, name):
         self.edlLoc = name
         
-    def createEDL(self):
+    def _prepareEDL(self):
+        '''
+        Prepares the EDL file by removing the section that is managed by this plugin
+        '''
+        if not os.path.isfile(self.edlLoc):
+            edlFile = open(self.edlLoc, 'w')
+        else:
+            edlFile = open(self.edlLoc, 'r+')
+            inMPSection = False
+            for line in edlFile.readlines():
+                if inMPSection:
+                    if line.startswith(MUTE_PROFANITY_MARKER_END):
+                        inMPSection = False
+                if line.startswith(MUTE_PROFANITY_MARKER_START):
+                    inMPSection = True
+                else:
+                    edlFile.write(line)
+        
+        return edlFile
+        
+    def updateEDL(self):
         try:
             srtFile = open(self.srtLoc, 'rU')
             filterFile = open(self.filterLoc, 'rU')
-            edlFile = open(self.edlLoc, 'w')
         except IOError:
             print "Cannot open file"
             sys.exit()
-            
+        
+        try:
+            edlFile = self._prepareEDL()
+        except:
+            print "Unable to write to edl file"
+            sys.exit()
+        
         ignored = ["<i>", "</i>", "<b>", "</b>", "<u>", "</u>", " '", "' ", "\"", "[", "]", "{", "}"]
         one_char = ["&nbsp;", "\r\n", "\n", "\r", "<br>", ".", ",", "?", "!", ";"]
 
