@@ -3,6 +3,7 @@
     <!-- Categories -->
     <string id="30100">General</string>
     <string id="30200">Advanced</string>
+    <string id="30300">Blocked Words</string>
 
     <!-- General Settings -->
     <string id="30120">Automatically download missing subtitles</string>
