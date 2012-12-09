@@ -9,21 +9,22 @@ import os
 import sys
 import xbmc
 import xbmcaddon
-import xbmcplugin
 import xbmcgui
 
-ADDON_ID = 'plugin.video.mute-profanity'
-Addon = xbmcaddon.Addon(id=ADDON_ID)
-ADDON_TITLE = Addon.getAddonInfo('name')
-
+Addon = xbmcaddon.Addon()
 __addon_path__ = Addon.getAddonInfo('path')
+__scriptid__   = Addon.getAddonInfo('id')
+__scriptname__ = Addon.getAddonInfo('name')
+__cwd__        = Addon.getAddonInfo('path')
+__version__    = Addon.getAddonInfo('version')
+
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __addon_path__, 'resources' ) )
 sys.path.append( os.path.join( BASE_RESOURCE_PATH, "lib" ))
 
 from UIManager import UIManager
-from EDLCreator import EDLCreator
+from EDLManager import EDLManager
 from SRTMuteReplace import NewSRTCreator
-from config import plugin
+
 import JSONUtils as data
 import SubFinder as subf
 
@@ -85,12 +86,12 @@ def createEDL():
         filterLoc = os.path.join( BASE_RESOURCE_PATH, "filter.txt" )
         safety = Addon.getSetting("safety")
         safety = float(safety) / 1000
-        edl = EDLCreator(srtLoc, filterLoc, safety)
+        edl = EDLManager(srtLoc, filterLoc, safety)
         if existsEDL(srtLoc):
-            ret = dialog.yesno(details['label'], plugin.get_string(30301))
+            ret = dialog.yesno(details['label'], Addon.getLocalizedString(30301))
             if not ret:
                 return False
-        edl.createEDL()
+        edl.updateEDL()
         if Addon.getSetting("editsrt") == "true":
         	srt = NewSRTCreator(srtLoc, filterLoc)
         	if existsSRTbck(srtLoc):
@@ -114,19 +115,19 @@ if mode == 'movie-details':
     xbmc.log('details: %s' % details)
     
     dialog = xbmcgui.Dialog()
-    ret = dialog.yesno(details['label'], plugin.get_string(30302))
+    ret = dialog.yesno(details['label'], Addon.getLocalizedString(30302))
     if not ret:
         sys.exit()
     
     fileLoc = details['file']
-    finder = subf.SubFinder(Addon, plugin)
+    finder = subf.SubFinder(Addon)
     srtLoc = finder.getSRT(fileLoc)
     if srtLoc:
         xbmc.log("Using srt file: %s" % srtLoc)
         if createEDL():
-            dialog.ok(details['label'], plugin.get_string(30303))
+            dialog.ok(details['label'], Addon.getLocalizedString(30303))
 else:
-    xbmc.log("Running %s v0.1. Using default listing." % ADDON_ID)
+    xbmc.log("Running %s v%s. Using default listing." % (__scriptid__, __version__))
     movieDict = data.GetAllMovies()
     xbmc.log("movieDict: %s" % movieDict)
     win = xbmcgui.WindowDialog()

@@ -4,6 +4,7 @@ Created August 26, 2012
 @author: Scott Brown
 '''
 import os
+import sys
 import time
 import traceback
 
@@ -22,9 +23,8 @@ def log(*args):
 
 class SubFinder():
     '''Used to find SRT subtitles'''
-    def __init__(self, Addon, plugin):
+    def __init__(self, Addon):
         self.Addon = Addon
-        self.plugin = plugin
         
         #copy our log function to the modules
         mkv.log = log
@@ -32,12 +32,14 @@ class SubFinder():
         dl.log = log
         
     def getSRT(self, fileLoc):
-        head, ext = os.path.splitext(fileLoc)
+        head, ext = os.path.splitext(os.path.basename(fileLoc))
         log("head: %s" % head)
         
         #First check existing subtitle files, especially existing SRT
         for fname in os.listdir(os.path.dirname(fileLoc)):
+            log("Checking fname: %s" % fname)
             if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".srt":
+                fname = os.path.join(os.path.dirname(fileLoc), fname)
                 log("Found existing SRT file: %s" % fname)
                 return fname
                 
@@ -47,6 +49,7 @@ class SubFinder():
         extensions = ['.ssa', '.ass']
         for fname in os.listdir(os.path.dirname(fileLoc)):
             if fname.startswith(head) and os.path.splitext(fname)[1].lower() in extensions:
+                fname = os.path.join(os.path.dirname(fileLoc), fname)
                 log("Found existing Substation Alpha file: %s" % fname)
                 try:
                     return ssatool.main(fname)
@@ -56,6 +59,7 @@ class SubFinder():
         #Check for SMI files
         for fname in os.listdir(os.path.dirname(fileLoc)):
             if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".smi":
+                fname = os.path.join(os.path.dirname(fileLoc), fname)
                 log("Found existing SMI file: %s" % fname)
                 try:
                     srtFile = smi2srt.convertSMI(fname)
@@ -67,6 +71,7 @@ class SubFinder():
         #Check for sub files last
         for fname in os.listdir(os.path.dirname(fileLoc)):
             if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".sub":
+                fname = os.path.join(os.path.dirname(fileLoc), fname)
                 log("Found existing SUB file: %s, converting to SRT" % fname)
                 try:
                     return sub2srt.convert(fname)
@@ -94,7 +99,7 @@ class SubFinder():
                 
             else:
                 pDialog = xbmcgui.DialogProgress()
-                pDialog.create('XBMC', self.plugin.get_string(30320))
+                pDialog.create('XBMC', self.Addon.getLocalizedString(30320))
                 extractor.startExtract(fileLoc, subTrack)
                 while extractor.isRunning():
                     if pDialog.iscanceled():
@@ -110,16 +115,16 @@ class SubFinder():
                     return srtFile
                 else:
                     log("Unable to extract subtitle from file")
-                    xbmcgui.Dialog().ok('XBMC', self.plugin.get_string(30321))
+                    xbmcgui.Dialog().ok('XBMC', self.Addon.getLocalizedString(30321))
                     
         dialog = xbmcgui.Dialog()
         download = True
         if not self.Addon.getSetting("autodownload"):
-            download = dialog.yesno("XBMC", self.plugin.get_string(30304))
+            download = dialog.yesno("XBMC", self.Addon.getLocalizedString(30304))
             
         if download:
             pDialog = xbmcgui.DialogProgress()
-            pDialog.create('XBMC', self.plugin.get_string(30305))
+            pDialog.create('XBMC', self.Addon.getLocalizedString(30305))
             log('Attempting to download subtitle file from the internet')
             extractor = dl.Manager()
             extractor.startDL(fileLoc, "eng")
@@ -137,7 +142,7 @@ class SubFinder():
                 return srtFile
             else:
                 log("Could not download subtitle file")
-                dialog.ok('XBMC', self.plugin.get_string(30306))
+                dialog.ok('XBMC', self.Addon.getLocalizedString(30306))
         
         #Any other options to create SRT file, put them here
         log("Could not use any means available to find the subtitle file")

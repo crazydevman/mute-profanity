@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
-id="plugin.video.mute-profanity"
-version="0.1.0"
-name="Mute Profanity"
-provider-name="Scott Brown"
->
+    id="plugin.video.mute-profanity"
+    version="1.0.0"
+    name="Mute Profanity"
+    provider-name="Scott Brown" >
+    
 <requires> </requires>
 <extension point="xbmc.python.pluginsource" library="addon.py">
     <provides>audio video</provides>

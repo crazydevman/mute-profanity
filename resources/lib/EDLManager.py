@@ -85,7 +85,7 @@ class EDLManager(object):
         else:
             lines.extend(readLines)
   
-        print "New lines: %s" % lines
+        #print "New lines: %s" % lines
 
         # loop through subtitles
         i = 0
@@ -162,6 +162,7 @@ class EDLManager(object):
         edlFile.close()
         filterFile.close()
         srtFile.close()
+        print "Done creating the EDL"
 
 def sfloat(times, start, end):
     try:
