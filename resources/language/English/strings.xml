@@ -12,7 +12,7 @@
     
     <!-- Advanced Settings -->
     <string id="30210">Use MKVToolNix subtitles from MKV files</string>
-    <string id="30211">Folder containing mkvextract & mkvinfo</string>
+    <string id="30211">Folder containing mkvextract &amp; mkvinfo</string>
     <string id="30220">Use MP4Box to extract subtitles from MP4 files</string>
     <string id="30221">Folder containing MP4Box</string>
     <string id="30250">Debug Mode (extra logging)</string>
