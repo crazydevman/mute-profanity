@@ -1,6 +1,7 @@
 *.pyc
 *.pyo
 .DS_Store
+.idea/*
 resources/ignore/*
 
 *.komodoproject
