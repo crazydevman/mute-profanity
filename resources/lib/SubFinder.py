@@ -128,8 +128,8 @@ class SubFinder():
             log('Attempting to download subtitle file from the internet')
             extractor = dl.Manager()
             extractor.startDL(fileLoc, "eng")
-            while (extractor.isRunning()):
-                if (pDialog.iscanceled()):
+            while extractor.isRunning():
+                if pDialog.iscanceled():
                     log("Dialog was cancelled, Stopping download")
                     pDialog.close()
                     return None
