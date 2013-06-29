@@ -111,7 +111,7 @@ class EDLManager(object):
             subtitle = ""
             line = lines[i]
             i+=1
-            while (line != '\n'): # blank line indicates end of subtitle
+            while line != '\n' and i < len(lines): # blank line indicates end of subtitle
                 subtitle += line.lower()
                 line = lines[i]
                 i+=1

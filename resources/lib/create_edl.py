@@ -8,7 +8,7 @@ Command line tool used to create an EDL
 '''
 
 import sys
-from resources.lib.EDLManager import EDLManager
+from EDLManager import EDLManager
 
 def main():
     args = sys.argv
@@ -21,7 +21,7 @@ def main():
     if len(args) == 4:
         worker.setEDLName(args[3])
         
-    worker.createEDL()
+    worker.updateEDL()
     
     print "EDL file %s created" % worker.edlLoc
     
