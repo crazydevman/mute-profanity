@@ -3,8 +3,13 @@
 import subprocess
 import popen2
 import os
+import commands
 import signal
 import threading
+import multiprocessing
+import threading
+import time
+import re
 
 class Process(object):
     def __init__(self, args):
@@ -12,32 +17,43 @@ class Process(object):
             self.proc = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
             self.stdout = self.proc.stdout
         else:
-            self.proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print self.proc.communicate()[0]
+            #self.proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            #print self.proc.communicate()[0]
             #self.stdout = self.proc.stdout
-            #self.proc = popen2.Popen3(args, capturestderr=True)
-            #self.proc.tochild.close()
-            #self.stdout = self.proc.fromchild
-            
-            print 'pid %d created' % self.proc.pid
+
+            carr = multiprocessing.Array('c', 1024000) #TODO: determine size
+            self._unix_proccess = multiprocessing.Process(target=self.unix_execute, args=(args, carr))
+            self._unix_proccess.start()
+            self._unix_out = carr
+
+            print 'pid %d created' % self._unix_proccess.pid
             
             #t = threading.Thread(target=self._unix_reading_thread)
             #t.setDaemon(True)
             #t.start()
+
+    def unix_execute(self, args, carr):
+        """
+        This should execute in another process, as it blocks
+        """
+        cmd = ' '.join(args)
+        print 'Executing this command: ' + cmd
+        code, output = commands.getstatusoutput(cmd)
+        carr.value = output
             
     def start_monitor_thread(self, OnRead=None, OnFinish=None):
         if os.name == 'nt':
-            target = self.windows_reading_thread
+            target = self._windows_reading_thread
         else:
             target = self._unix_reading_thread
             
-        t = threading.Thread(target=self._unix_reading_thread, args=(OnRead,OnFinish))
+        t = threading.Thread(target=target, args=(OnRead,OnFinish))
         t.start()
         return t
     
     def _windows_reading_thread(self, OnRead, OnFinish):
         while not self.proc.poll(): 
-            line = outfile.readline()
+            line = self.stdout.readline()
             if OnRead:
                 OnRead(line)
             if not len(line):
@@ -48,48 +64,39 @@ class Process(object):
             OnFinish()
             
     def _unix_reading_thread(self, OnRead, OnFinish):
-        import select
-        import fcntl
-        
-        outfile=self.proc.fromchild
-        outfd=outfile.fileno() 
-        file_flags = fcntl.fcntl(outfd, fcntl.F_GETFL) 
-        fcntl.fcntl(outfd, fcntl.F_SETFL, file_flags | os.O_NDELAY)
-        
-        while True:
-            if self.poll() != None:
-                if OnFinish:
-                    OnFinish()
-                break
-            
-            rlist, wlist, xlist = select.select([outfd], [], [], .1)
-            if not rlist:
-                continue
-            
-            outchunk = outfile.read()
-            if outchunk:
-                if OnRead:
-                    OnRead(outchunk)
-            else:
-                break
-        
-        self.proc.wait()
+        if self._unix_proccess.is_alive():
+            self._unix_proccess.join()
+
+        if OnRead:
+            for line in self.get_outlines():
+                print "Calling OnRead for line: %s" % line
+                OnRead(line)
+        if OnFinish:
+            OnFinish()
         
     def wait(self):
-        return self.proc.wait()
+        if os.name == 'nt':
+            return self.proc.wait()
+        elif self._unix_proccess.is_alive():
+            self._unix_proccess.join()
             
     def poll(self):
         if os.name == 'nt':
             return self.proc.poll()
         else:
-            result = self.proc.poll()
-            if result == -1:
+            if self._unix_proccess.is_alive():
                 return None
-            return result
+            return self._unix_proccess.exitcode
         
     def kill(self):
         if os.name == 'nt':
             self.proc.kill()
+        elif self._unix_proccess.is_alive():
+            self._unix_proccess.terminate()
+
+    def get_outlines(self):
+        if os.name == 'nt':
+            return self.stdout.readlines()
         else:
-            os.kill(self.proc.pid, signal.SIGKILL)
-            self.proc.wait()
+            return re.split('\r|\n', self._unix_out.value)
+

@@ -11,7 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(MY_DIR, '../lib')))
 from MKVSubExtract import MKVExtractor
 
 #Global movie path not checked into repo
-movie_path = '/Users/sbrown/Movies/Sherlock Holmes/cbgb-sherlockholmes720.mkv'
+movie_path = '/Users/scottbrown/Movies/Sherlock Holmes/cbgb-sherlockholmes720.mkv'
 
 class TestProcess(unittest.TestCase):
     
@@ -39,7 +39,7 @@ class TestProcess(unittest.TestCase):
         self.assertEqual(x.progress, 100)
         
         sub_file = x.getSubFile()
-        self.assertTrue(sub_file != None)
+        self.assertTrue(sub_file is not None)
         self.assertTrue(os.path.isfile(sub_file))
         
         

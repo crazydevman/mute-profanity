@@ -6,8 +6,10 @@ from XBMCPyProcess import Process
 import ssatool
 
 def log(*args):
+    arr = []
     for arg in args:
-        print arg
+        arr.append(str(arg))
+    print ' '.join(arr)
 
 class MKVExtractor:
     def __init__(self, toolsDir=''):
@@ -21,8 +23,9 @@ class MKVExtractor:
         infoPath = os.path.join(self.toolsDir, "mkvinfo")
         log('path to executable mkvinfo: %s' % infoPath)
         log('path of file to check %s' % filePath)
-        proc = Process([infoPath, filePath])
-        output = proc.stdout.readlines()
+        proc = Process([infoPath, "'" + filePath + "'"])
+        proc.wait()
+        output = proc.get_outlines()
         log('output was %s' % output)
         log('Result was %d' % proc.poll())
         
@@ -58,7 +61,6 @@ class MKVExtractor:
                 continue
         
         subTrackID = None
-        ssaTypes = ['S_TEXT/SSA', 'S_TEXT/ASS']
         for track in tracks.values():
             if track['type'] != 'subtitles':
                 continue
@@ -83,17 +85,23 @@ class MKVExtractor:
         self.progress = 0
         extractPath = os.path.join(self.toolsDir, "mkvextract")
         self.outPath = os.path.splitext(filePath)[0] + self.trackExt
-        args = [extractPath, "tracks", filePath, str(trackID) + ':' + self.outPath]
+        args = [extractPath, "tracks", "'" + filePath + "'", "'" + str(trackID) + ':' + self.outPath + "'"]
         log('executing args: %s' % args)
         
         self.proc = Process(args)
         self.mThread = self.proc.start_monitor_thread(self._ReadProgress, self._FinishExtract)
         
     def _ReadProgress(self, line):
+        log('Reading line: ', line)
+        print "Reading line: "
+        print line
         # extract percentages from string "Progress: n%"
-        r = re.search('Progress:\s+(\d+)', line)
+        r = re.search("Progress:\s+(\d+)", line)
         if r:
             self.progress = int(r.group(1))
+            log("Set progress to ", self.progress)
+        else:
+            log('Ignoring line: ', line)
             
     def _FinishExtract(self):
         log("Ending execution")
