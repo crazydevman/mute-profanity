@@ -12,7 +12,7 @@ def log(*args):
     print ' '.join(arr)
 
 class MKVExtractor:
-    def __init__(self, toolsDir=''):
+    def __init__(self, toolsDir='/usr/local/bin'):
         self.toolsDir = toolsDir
         self.progress = 0
         self.mThread = None
