@@ -23,7 +23,7 @@ class MKVExtractor:
         infoPath = os.path.join(self.toolsDir, "mkvinfo")
         log('path to executable mkvinfo: %s' % infoPath)
         log('path of file to check %s' % filePath)
-        proc = Process([infoPath, "'" + filePath + "'"])
+        proc = Process([infoPath, filePath])
         proc.wait()
         output = proc.get_outlines()
         log('output was %s' % output)
@@ -85,7 +85,7 @@ class MKVExtractor:
         self.progress = 0
         extractPath = os.path.join(self.toolsDir, "mkvextract")
         self.outPath = os.path.splitext(filePath)[0] + self.trackExt
-        args = [extractPath, "tracks", "'" + filePath + "'", "'" + str(trackID) + ':' + self.outPath + "'"]
+        args = [extractPath, "tracks", filePath , str(trackID) + ':' + self.outPath]
         log('executing args: %s' % args)
         
         self.proc = Process(args)
