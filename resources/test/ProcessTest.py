@@ -12,6 +12,7 @@ from XBMCPyProcess import Process
 def PrintLine(line):
     print line
 
+
 class TestProcess(unittest.TestCase):
     
     def test_sleep(self):
@@ -33,11 +34,15 @@ class TestProcess(unittest.TestCase):
         
         #Test the command ran without problem
         self.assertEqual(proc.poll(), None)
-        
-        for line in proc.stdout.readlines():
-            print "Line: %s" % line
-        
-        self.assertTrue(proc.poll() != None)
+
+        proc.wait()
+
+        for i, line in enumerate(proc.get_outlines()):
+            self.assertEqual(line, "%d" % (i+1))
+            lastline = line
+
+        self.assertTrue(proc.poll() is not None)
+        self.assertEqual(lastline, "10")
         
     def test_pipe_output(self):
         args = ['python', 'PrintNumExec.py', '12']
@@ -45,13 +50,22 @@ class TestProcess(unittest.TestCase):
         
         #Test the command ran without problem
         self.assertEqual(proc.poll(), None)
-        
-        while not proc.poll():
-            line = proc.stdout.readline()
-            if not line:
-                break
-            print "Line: %s" % line
-            
+
+        self.lastLine = None
+        self.finished = False
+        mThread = proc.start_monitor_thread(self._ReadProgress, self._FinishExtract)
+
+        proc.wait()
+
+        self.assertTrue(self.finished)
+        self.assertEqual(self.lastLine, "12")
+
+    def _ReadProgress(self, line):
+        self.lastLine = line
+
+    def _FinishExtract(self):
+        self.finished = True
+
     #def test_mkvextract(self):
     #    movie_path = '/??.mkv'
     #    args = ["mkvextract", "tracks", movie_path, '3:/tmp/myfile.srt']
