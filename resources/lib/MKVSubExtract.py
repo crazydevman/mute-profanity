@@ -92,7 +92,7 @@ class MKVExtractor:
         self.mThread = self.proc.start_monitor_thread(self._ReadProgress, self._FinishExtract)
         
     def _ReadProgress(self, line):
-        log('Reading line: ', line)
+        #log('Reading line: ', line)
         # extract percentages from string "Progress: n%"
         r = re.search("Progress:\s+(\d+)", line)
         if r:

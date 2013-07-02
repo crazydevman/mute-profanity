@@ -70,10 +70,8 @@ class Process(object):
 
     def _unix_reading_thread(self, OnRead, OnFinish):
         if OnRead:
-            with open(self._unix_fifo.name, 'r') as file:
+            with open(self._unix_fifo.name, 'rU') as file:
                 for line in self.read_file(file):
-                    print "Read the line: %s" % line
-                    print "Which has len of %d" % len(line)
                     OnRead(line)
         if OnFinish:
             OnFinish()
@@ -103,30 +101,16 @@ class Process(object):
         if os.name == 'nt':
             return self.stdout.readlines()
         else:
-            with open(self._unix_fifo.name, 'rU') as file:
-                lines = []
-                for line in self.read_file(file):
-                    lines.append(line)
-                return lines
+            with open(self._unix_fifo.name) as file:
+                return file.readlines()
 
     def read_file(self, file):
-        line = []
         while True:
-            c = file.read(1)
-            if not c:
-                if self._unix_complete:
-                    if line:
-                        yield ''.join(line)
-                    break
-                else:
-                    time.sleep(.1)
+            line = file.readline()
+            if not line:
+                if not self._unix_complete:
+                    time.sleep(0.1)    # Sleep briefly
                     continue
-
-            if c in ('\n', '\r'):
-                full = ''.join(line)
-                print "Yielding line: %s" % full
-                line = []
-                yield full
-            else:
-                line.append(c)
+                break
+            yield line
 
