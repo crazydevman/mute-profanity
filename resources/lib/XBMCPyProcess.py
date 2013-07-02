@@ -55,7 +55,6 @@ class Process(object):
         t.start()
         return t
 
-
     def _windows_reading_thread(self, OnRead, OnFinish):
         while not self.proc.poll():
             line = self.stdout.readline()

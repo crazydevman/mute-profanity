@@ -26,7 +26,7 @@ class TestProcess(unittest.TestCase):
         proc.kill()
         
         #Test poll returns now
-        self.assertTrue(proc.poll() != None)
+        self.assertTrue(proc.poll() is not None)
         
     def test_get_output(self):
         args = ['python', 'PrintNumExec.py', '10']
@@ -38,11 +38,11 @@ class TestProcess(unittest.TestCase):
         proc.wait()
 
         for i, line in enumerate(proc.get_outlines()):
-            self.assertEqual(line, "%d" % (i+1))
+            self.assertEqual(line, "%d\n" % (i+1))
             lastline = line
 
         self.assertTrue(proc.poll() is not None)
-        self.assertEqual(lastline, "10")
+        self.assertEqual(lastline, "10\n")
         
     def test_pipe_output(self):
         args = ['python', 'PrintNumExec.py', '12']
@@ -55,10 +55,10 @@ class TestProcess(unittest.TestCase):
         self.finished = False
         mThread = proc.start_monitor_thread(self._ReadProgress, self._FinishExtract)
 
-        proc.wait()
+        mThread.join()
 
         self.assertTrue(self.finished)
-        self.assertEqual(self.lastLine, "12")
+        self.assertEqual(self.lastLine, "12\n")
 
     def _ReadProgress(self, line):
         self.lastLine = line
