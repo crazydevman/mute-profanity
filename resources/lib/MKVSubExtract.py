@@ -93,15 +93,10 @@ class MKVExtractor:
         
     def _ReadProgress(self, line):
         log('Reading line: ', line)
-        print "Reading line: "
-        print line
         # extract percentages from string "Progress: n%"
         r = re.search("Progress:\s+(\d+)", line)
         if r:
             self.progress = int(r.group(1))
-            log("Set progress to ", self.progress)
-        else:
-            log('Ignoring line: ', line)
             
     def _FinishExtract(self):
         log("Ending execution")
