@@ -1,6 +1,5 @@
 import os
 import re
-import threading
 
 from XBMCPyProcess import Process
 import ssatool
@@ -12,7 +11,11 @@ def log(*args):
     print ' '.join(arr)
 
 class MKVExtractor:
-    def __init__(self, toolsDir='/usr/local/bin'):
+    def __init__(self, toolsDir=''):
+        if not toolsDir and os.name != 'nt':
+            if not os.getenv('PATH'):
+                os.putenv('PATH', '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin:/opt/X11/bin')
+
         self.toolsDir = toolsDir
         self.progress = 0
         self.mThread = None

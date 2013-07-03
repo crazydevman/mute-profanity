@@ -9,10 +9,6 @@ sys.path.append(os.path.abspath(os.path.join(MY_DIR, '../lib')))
 
 from XBMCPyProcess import Process
 
-def PrintLine(line):
-    print line
-
-
 class TestProcess(unittest.TestCase):
     
     def test_sleep(self):
