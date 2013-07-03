@@ -139,6 +139,7 @@ if mode == 'movie-details':
             dialog.ok(details['label'], Addon.getLocalizedString(30307))
 else:
     xbmc.log("Running %s v%s. Using default listing." % (__scriptid__, __version__))
+    xbmc.log(" %s " % str(sys.argv[:]))
     movieDict = data.GetAllMovies()
     xbmc.log("movieDict: %s" % movieDict)
     win = xbmcgui.WindowDialog()

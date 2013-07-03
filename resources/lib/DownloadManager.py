@@ -7,18 +7,12 @@ Created on Sept 10, 2012
 
 import time
 import threading
-from multiprocessing import Process, Array
 import os
-
-import SubDownloader
+from XBMCPyProcess import Process
 
 def log(*args):
     for arg in args:
         print arg
-        
-def ProcessTarget(filePath, language, c_arr):
-    srtFile = SubDownloader.FindSubtitles(filePath, language)
-    c_arr.value = srtFile
 
 class Manager:
     def __init__(self):
@@ -26,27 +20,41 @@ class Manager:
         self.srtPath = None
         
     def startDL(self, filePath, language):
-        #path = os.path.join(os.path.dirname(__file__), "SubDownloader.py")
-        #args = ["python", path, filePath, language]
-        #log('executing args: %s' % args)
+        path = os.path.join(os.path.dirname(__file__), "SubDownloader.py")
+        args = ["python", path, filePath, language]
+        log('executing args: %s' % args)
         
-        #TODO: xbmc execute script?
-        #self.proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        self.c_arr = Array('c', 256)
-        self.proc = Process(target=ProcessTarget, args=(filePath, language, self.c_arr))
-        self.proc.start()
+        self.proc = Process(args)
+        log('proc created')
+        
+        self.mThread = threading.Thread(target=self.monitorThread)
+        self.mThread.setDaemon(True)
+        self.mThread.start()
+        
+    def monitorThread(self):
+        '''Monitor Thread is running as long as the process is running'''
+        output = self.proc.stdout
+        
+        while not self.proc.poll():
+            line = output.readline()
+            if line != '':
+                log(line)
+            
+        exitCode = self.proc.poll()
+        log("Script completed with exit code: %d" % exitCode)
+        if exitCode == 0:
+            self.srtPath = output.readline()
     
     def cancelDL(self):
-        self.proc.terminate()
+        returnCode = self.proc.poll()
+        if returnCode is not None:
+            return
+        self.proc.kill()
         
     def isRunning(self):
-        try:
-            return self.proc.is_alive()
-        except:
-            return False
+        if self.mThread:
+            return self.mThread.isAlive()
+        return False
     
     def getSubFile(self):
-        self.srtPath = self.c_arr.value
-        if len(self.srtPath) == 0:
-            return None
         return self.srtPath

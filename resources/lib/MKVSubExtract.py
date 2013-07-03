@@ -1,16 +1,21 @@
 import os
 import re
-import threading
-import subprocess
 
+from XBMCPyProcess import Process
 import ssatool
 
 def log(*args):
+    arr = []
     for arg in args:
-        print arg
+        arr.append(str(arg))
+    print ' '.join(arr)
 
 class MKVExtractor:
     def __init__(self, toolsDir=''):
+        if not toolsDir and os.name != 'nt':
+            if not os.getenv('PATH'):
+                os.putenv('PATH', '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin:/opt/X11/bin')
+
         self.toolsDir = toolsDir
         self.progress = 0
         self.mThread = None
@@ -21,13 +26,15 @@ class MKVExtractor:
         infoPath = os.path.join(self.toolsDir, "mkvinfo")
         log('path to executable mkvinfo: %s' % infoPath)
         log('path of file to check %s' % filePath)
-        proc = subprocess.Popen([infoPath, filePath], stdout=subprocess.PIPE)
-        output = proc.communicate()[0]
+        proc = Process([infoPath, filePath])
+        proc.wait()
+        output = proc.get_outlines()
         log('output was %s' % output)
+        log('Result was %d' % proc.poll())
         
         tracks = {}
         trackNumber = None
-        for line in output.splitlines():
+        for line in output:
             r = re.search('[+] Track number: (\d+)', line)
             if r:
                 trackNumber = int(r.group(1))
@@ -57,7 +64,6 @@ class MKVExtractor:
                 continue
         
         subTrackID = None
-        ssaTypes = ['S_TEXT/SSA', 'S_TEXT/ASS']
         for track in tracks.values():
             if track['type'] != 'subtitles':
                 continue
@@ -82,36 +88,26 @@ class MKVExtractor:
         self.progress = 0
         extractPath = os.path.join(self.toolsDir, "mkvextract")
         self.outPath = os.path.splitext(filePath)[0] + self.trackExt
-        args = [extractPath, "tracks", filePath, str(trackID) + ':' + self.outPath]
+        args = [extractPath, "tracks", filePath , str(trackID) + ':' + self.outPath]
         log('executing args: %s' % args)
         
-        self.proc = subprocess.Popen(args, stdout=subprocess.PIPE,shell=True, universal_newlines=True)
+        self.proc = Process(args)
+        self.mThread = self.proc.start_monitor_thread(self._ReadProgress, self._FinishExtract)
         
-        self.mThread = threading.Thread(target=self.monitorThread)
-        self.mThread.setDaemon(True)
-        self.mThread.start()
-        
-    def monitorThread(self):
-        '''Monitor Thread is running as long as the process is running'''
-        outfile=self.proc.stdout
-
-        log("Starting to read stdout from mkvextract")
-        while not self.proc.poll(): 
-            line = outfile.readline()
-            #log('line received: %s' % line)
-            if not len(line):
-                break
-
-            # extract percentages from string "Progress: n%"
-            r = re.search('Progress:\s+(\d+)', line)
-            if r:
-                self.progress = int(r.group(1))
+    def _ReadProgress(self, line):
+        #log('Reading line: ', line)
+        # extract percentages from string "Progress: n%"
+        r = re.search("Progress:\s+(\d+)", line)
+        if r:
+            self.progress = int(r.group(1))
             
+    def _FinishExtract(self):
         log("Ending execution")
         try:
-            self.proc.terminate()
+            self.proc.kill()
         except:
             pass
+        self.mThread = None
     
     def cancelExtract(self):
         returnCode = self.proc.poll()
@@ -132,7 +128,7 @@ class MKVExtractor:
         if self.trackExt == '.srt':
             return self.outPath
         
-        #Convert the SSA file to
+        #Convert the SSA file to SRT
         try:
             return ssatool.main(self.outPath)
         except:
