@@ -5,6 +5,7 @@ import os
 import string
 import sys
 import traceback
+from threading import Thread
 
 from zipfile import *
 from xmlrpclib import ServerProxy
@@ -15,6 +16,19 @@ _null_trans = string.maketrans("", "")
 
 server = ServerProxy("http://api.opensubtitles.org/xml-rpc")
 token = ""
+
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs, Verbose)
+        self._return = None
+    def run(self):
+        if self._Thread__target is not None:
+            self._return = self._Thread__target(*self._Thread__args,
+                                                **self._Thread__kwargs)
+    def join(self, timeout=None):
+        Thread.join(self, timeout)
+        return self._return
 
 
 def FindSubtitles(videoname, lang):
@@ -51,7 +65,7 @@ def GetSubtitles(moviepath):
     data = server.SearchSubtitles(token, movies)['data']
 
     # if the hash fails, try searching by title of movie (assuming file is named after its title)
-    if (data == False):
+    if not data:
         basename = os.path.basename(moviepath)
         name = os.path.splitext(basename)[0]
         print >> sys.stderr, "Could not find by hash ..."
@@ -92,7 +106,7 @@ def Compute(name):
         returnedhash = "%016x" % hash
         return returnedhash
 
-    except(IOError):
+    except IOError:
         return "IOError"
 
 
@@ -141,6 +155,12 @@ def Download(url, filename):
     print >> sys.stderr, "file " + filename + ".zip created"
     return filename + ".zip"
 
+
+def StartThreaded(videoname, lang):
+    t = ThreadWithReturnValue(target=FindSubtitles, args=(videoname, lang))
+    t.setDaemon(True)
+    t.start()
+    return t
 
 def main():
     args = sys.argv

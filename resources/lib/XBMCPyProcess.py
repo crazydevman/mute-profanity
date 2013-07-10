@@ -9,6 +9,7 @@ import tempfile
 
 class Process(object):
     def __init__(self, args):
+        os.name = 'nt'
         if os.name == 'nt':
             self.proc = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
             self.stdout = self.proc.stdout

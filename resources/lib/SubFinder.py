@@ -10,7 +10,7 @@ import traceback
 
 import MKVSubExtract as mkv
 import MP4SubExtract as mp4
-import DownloadManager as dl
+import SubDownloader as sdl
 import sub2srt
 import ssatool
 import smi2srt
@@ -29,7 +29,7 @@ class SubFinder():
         #copy our log function to the modules
         mkv.log = log
         mp4.log = log
-        dl.log = log
+        sdl.log = log
         
     def getSRT(self, fileLoc):
         head, ext = os.path.splitext(os.path.basename(fileLoc))
@@ -126,17 +126,17 @@ class SubFinder():
             pDialog = xbmcgui.DialogProgress()
             pDialog.create('XBMC', self.Addon.getLocalizedString(30305))
             log('Attempting to download subtitle file from the internet')
-            extractor = dl.Manager()
-            extractor.startDL(fileLoc, "eng")
-            while extractor.isRunning():
+            extractor = sdl.StartThreaded(fileLoc, "eng")
+            while extractor.isAlive():
                 if pDialog.iscanceled():
                     log("Dialog was cancelled, Stopping download")
+                    extractor.join(.01)
                     pDialog.close()
                     return None
                 time.sleep(.1)
             
             pDialog.close()
-            srtFile = extractor.getSubFile()
+            srtFile = extractor.join()
             if srtFile:
                 log("Successfully downloaded subtitle file: %s" % srtFile)
                 return srtFile
