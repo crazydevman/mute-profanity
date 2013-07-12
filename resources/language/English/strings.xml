@@ -17,6 +17,16 @@
     <string id="30221">Folder containing MP4Box</string>
     <string id="30250">Debug Mode (extra logging)</string>
 
+    <!-- Blocking Settings -->
+    <string id="30400">Blocking Severity</string>
+    <string id="30410">Expletives</string>
+    <string id="30411">Religious &amp; Deity</string>
+    <string id="30412">Sexual Words</string>
+    <string id="30413">Derogatory Terms</string>
+    <string id="30420">To block only a few words, set the severity to Low</string>
+    <string id="30421">High values will block more words and are appropriate for young children</string>
+    <string id="30422">High values cause more false-positives being blocked</string>
+
     <!--Messages-->
     <string id="30300">Mute Profanity</string>
     <string id="30301">This will overwrite the existing mute profanity file.

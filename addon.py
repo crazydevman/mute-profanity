@@ -27,6 +27,7 @@ from SRTMuteReplace import NewSRTCreator
 
 import JSONUtils as data
 import SubFinder as subf
+import filter
 
 # magic; id of this plugin's instance - cast to integer
 _thisPlugin = int(sys.argv[1])
@@ -78,34 +79,32 @@ def existsEDL(srtLoc):
     except:
         return False
 
-
-def existsSRTbck(srtLoc):
-    try:
-        srtbck = srtLoc + ".bck"
-        return os.path.isfile(srtbck)
-    except:
-        return False
-
+def get_blocked_words():
+    filterLoc = os.path.join(BASE_RESOURCE_PATH, "filter.txt")
+    categories = filter.parse_file(filterLoc)
+    mapping = {'0': None, '1': 10, '2': 8, '3': 6, '4': 2}
+    severities = {'Expletives': mapping[Addon.getSetting("blockcat1")],
+                  'Religious': mapping[Addon.getSetting("blockcat2")],
+                  'Sexual': mapping[Addon.getSetting("blockcat3")],
+                  'Derogatory Terms': mapping[Addon.getSetting("blockcat4")]}
+    return filter.get_blocked_words(categories, severities)
 
 def createEDL():
     try:
-        filterLoc = os.path.join(BASE_RESOURCE_PATH, "filter.txt")
         safety = Addon.getSetting("safety")
         safety = float(safety) / 1000
-        edl = EDLManager(srtLoc, filterLoc, safety)
+        edl = EDLManager(srtLoc, get_blocked_words(), safety)
         if existsEDL(srtLoc):
             ret = dialog.yesno(details['label'], Addon.getLocalizedString(30301))
             if not ret:
                 return False
-        edl.updateEDL()
-        print Addon.getSetting('editsrt')
+
         if Addon.getSetting("editsrt") == "true":
-            srt = NewSRTCreator(srtLoc, filterLoc)
-            if existsSRTbck(srtLoc):
-                os.rename(srtLoc + '.bck', srtLoc)
-            if srt.createNewSRT():
-                os.rename(srtLoc, srtLoc + '.bck')
-                os.rename(srtLoc[:-3] + "tmp", srtLoc)
+            # Tell the edl manager to replace blocked works on SRT file too
+            edl.modify_srt = True
+
+        # Does all work to update / create EDL, update SRT
+        edl.updateEDL()
         return True
     except:
         print "Unexpected error:", sys.exc_info()[0]

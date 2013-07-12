@@ -1,8 +1,9 @@
-'''
+"""
 Created on Apr 7, 2012
+Last Update on July 11, 2013
 
 @author: Scott Brown
-'''
+"""
 
 import sys
 import re
@@ -12,26 +13,23 @@ MUTE_PROFANITY_MARKER_START = "###### This section is automatically maintained b
 MUTE_PROFANITY_MARKER_END = "###### END Mute Profanity plugin section ######"
 
 class EDLManager(object):
-    '''
-    classdocs
-    '''
-
-    def __init__(self, srtLoc, filterLoc, safety=.35):
-        '''
+    def __init__(self, srtLoc, blocked_words, safety=.35):
+        """
         Constructor
-        '''
+        """
         self.srtLoc = srtLoc
-        self.filterLoc = filterLoc
+        self.blocked_words = blocked_words
         self.safety = safety
         self.edlLoc = srtLoc[:-3] + "edl"
+        self.modify_srt = False
         
     def setEDLName(self, name):
         self.edlLoc = name
         
     def _prepareEDL(self):
-        '''
+        """
         Prepares the EDL file by removing the section that is managed by this plugin
-        '''
+        """
         if not os.path.isfile(self.edlLoc):
             edlFile = open(self.edlLoc, 'w')
         else:
@@ -51,9 +49,8 @@ class EDLManager(object):
     def updateEDL(self):
         try:
             srtFile = open(self.srtLoc, 'rU')
-            filterFile = open(self.filterLoc, 'rU')
         except IOError:
-            print "Cannot open file"
+            print "Cannot open .srt file"
             sys.exit()
         
         try:
@@ -65,15 +62,7 @@ class EDLManager(object):
         ignored = ["<i>", "</i>", "<b>", "</b>", "<u>", "</u>", " '", "' ", "\"", "[", "]", "{", "}"]
         one_char = ["&nbsp;", "\r\n", "\n", "\r", "<br>", ".", ",", "?", "!", ";"]
 
-        # create profanity list from filter
-        profanity = []
-        for line in filterFile:
-            if len(line):
-                asRegex = line.strip().lower().replace('*', '\w*')
-                profanity.append(asRegex)
-        filterFile.close()
-
-        print ("profanity: %s" % profanity)
+        print ("profanity: %s" % self.blocked_words)
         
         lines = []
         readLines = srtFile.readlines()
@@ -92,7 +81,7 @@ class EDLManager(object):
         while True:
             # read caption number
             if i >= len(lines):
-                break;
+                break
             
             num = lines[i]
             i+=1
@@ -105,7 +94,6 @@ class EDLManager(object):
             i+=1
             if len(times) == 0:
                 times = srtFile.readline().strip()
-                srtFile.newlines
         
             # read next lines into single subtitle string
             subtitle = ""
@@ -126,7 +114,7 @@ class EDLManager(object):
             
             # find matches, store timing and muted word in mutes array
             mutes = []
-            for word in profanity:
+            for word in self.blocked_words:
                 regex = r"\b" + word + r"\b"
                 iterator = re.finditer(regex, subtitle, re.IGNORECASE)
                 for match in iterator:
@@ -156,13 +144,30 @@ class EDLManager(object):
                 for mute in mutes:
                     mStart = max(0, mute[0] * durationPerChar - self.safety) + tStart
                     mFinish = min((mute[1] * durationPerChar) + (tStart + mute[0] * durationPerChar) + self.safety, tFinish)
-                    edlFile.write(str(mStart) + "\t" + str(mFinish) + "\t1\t# Muted:" + mute[2] +"\n");
+                    edlFile.write(str(mStart) + "\t" + str(mFinish) + "\t1\t# Muted:" + mute[2] +"\n")
             
         # close files    
         edlFile.close()
-        filterFile.close()
-        srtFile.close()
         print "Done creating the EDL"
+
+        if self.modify_srt:
+            print "Overwriting the existing srt file with stars"
+            srtNewLoc = self.srtLoc[:-3] + "tmp"
+            NewSRTFile = open(srtNewLoc, 'w')
+            for line in srtFile.readlines():
+                for word in self.blocked_words:
+                    regex = r"\b(?i)" + word + r"\b"
+                    line = re.sub(regex, "*****", line)
+                NewSRTFile.write(line)
+
+            NewSRTFile.close()
+            if not os.path.isfile(self.srtLoc + ".bck"):
+                # Don't overwrite the original srt file (with the curse words)
+                os.rename(self.srtLoc, self.srtLoc + ".bck")
+            os.rename(srtNewLoc, self.srtLoc)
+
+        srtFile.close()
+
 
 def sfloat(times, start, end):
     try:

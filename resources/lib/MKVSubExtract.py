@@ -22,7 +22,7 @@ class MKVExtractor:
         self.trackExt = None
 
     def getSubTrack(self, filePath):
-        '''Uses mkvinfo to find the track that contains the subtitles'''
+        """Uses mkvinfo to find the track that contains the subtitles"""
         infoPath = os.path.join(self.toolsDir, "mkvinfo")
         log('path to executable mkvinfo: %s' % infoPath)
         log('path of file to check %s' % filePath)
