@@ -1,6 +1,6 @@
 """
 Created on Apr 7, 2012
-Last Update on July 11, 2013
+Last Update on July 12, 2013
 
 @author: Scott Brown
 """
@@ -124,6 +124,7 @@ class EDLManager(object):
             # find matches, store timing and muted word in mutes array
             mutes = []
             for word in self.blocked_words:
+                word = word.replace('*', '\w*')
                 regex = r"\b" + word + r"\b"
                 iterator = re.finditer(regex, subtitle, re.IGNORECASE)
                 for match in iterator:
@@ -168,6 +169,7 @@ class EDLManager(object):
             srtFile.seek(0)
             for line in srtFile.readlines():
                 for word in self.blocked_words:
+                    word = word.replace('*', '\w*')
                     regex = r"\b(?i)" + word + r"\b"
                     line = re.sub(regex, "*****", line)
                 NewSRTFile.write(line)

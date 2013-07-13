@@ -11,10 +11,10 @@
         <setting label="30420" type="lsep"/>
         <setting label="30421" type="lsep"/>
         <setting label="30422" type="lsep"/>
-        <setting label="30410" type="enum" id="blockcat1" default="1" values="None|Low|Medium|High|Very High"/>
-        <setting label="30411" type="enum" id="blockcat2" default="1" values="None|Low|Medium|High|Very High"/>
-        <setting label="30412" type="enum" id="blockcat3" default="1" values="None|Low|Medium|High|Very High"/>
-        <setting label="30413" type="enum" id="blockcat4" default="1" values="None|Low|Medium|High|Very High"/>
+        <setting label="30410" type="labelenum" id="blockcat1" default="Medium" values="None|Low|Medium|High|Very High"/>
+        <setting label="30411" type="labelenum" id="blockcat2" default="None"   values="None|Low|Medium|High|Very High"/>
+        <setting label="30412" type="labelenum" id="blockcat3" default="Low"    values="None|Low|Medium|High|Very High"/>
+        <setting label="30413" type="labelenum" id="blockcat4" default="Low"    values="None|Low|Medium|High|Very High"/>
     </category>
 
     <category label="30200">

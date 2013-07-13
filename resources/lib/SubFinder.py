@@ -124,7 +124,7 @@ class SubFinder():
                     
         dialog = xbmcgui.Dialog()
         download = True
-        if not self.Addon.getSetting("autodownload"):
+        if self.Addon.getSetting("autodownload") != "true":
             download = dialog.yesno("XBMC", self.Addon.getLocalizedString(30304))
             
         if download:

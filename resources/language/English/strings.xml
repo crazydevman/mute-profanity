@@ -33,7 +33,7 @@
 Are you sure you would like to do this?</string>
     <string id="30302">Do you want mute profanity for this movie?</string>
     <string id="30303">Success! You can now play the movie normally</string>
-    <string id="30304">Could not find subtiles file, download one?</string>
+    <string id="30304">Could not find subtitles file, download one?</string>
     <string id="30305">Downloading subtitles...</string>
     <string id="30306">Unable to download file.
 Try again later</string>
