@@ -1,10 +1,9 @@
-'''
+"""
 Created August 26, 2012
 
 @author: Scott Brown
-'''
+"""
 import os
-import sys
 import time
 import traceback
 
@@ -81,7 +80,11 @@ class SubFinder():
         extractor = None
         if ext.lower() == '.mkv' and self.Addon.getSetting("usemkvextract") == "true":
             log("Will attempt to use mkvextract to extract subtitle")
-            extractor = mkv.MKVExtractor() #Addon.getSetting("mkvextractpath"))
+            toolsDir = self.Addon.getSetting("mkvextractpath")
+            if toolsDir:
+                extractor = mkv.MKVExtractor(toolsDir)
+            else:
+                extractor = mkv.MKVExtractor()
         elif (ext.lower() == ".m4v" or ext.lower() == '.mp4') and self.Addon.getSetting("usemp4box") == "true":
             log("Will attempt to use mp4box to extract subtitle")
             extractor = mp4.MP4Extractor()

@@ -35,15 +35,23 @@ class EDLManager(object):
         else:
             edlFile = open(self.edlLoc, 'r+')
             inMPSection = False
+            lines_to_write = []
             for line in edlFile.readlines():
                 if inMPSection:
                     if line.startswith(MUTE_PROFANITY_MARKER_END):
                         inMPSection = False
-                if line.startswith(MUTE_PROFANITY_MARKER_START):
-                    inMPSection = True
+                elif not line.startswith(MUTE_PROFANITY_MARKER_START):
+                    lines_to_write.append(line)
                 else:
-                    edlFile.write(line)
-        
+                    inMPSection = True
+
+            edlFile.seek(0)
+            if lines_to_write:
+                print "About to write these lines: %s" % str(lines_to_write)
+                edlFile.writelines(lines_to_write)
+
+        edlFile.write(MUTE_PROFANITY_MARKER_START)
+        edlFile.write("\n")
         return edlFile
         
     def updateEDL(self):
@@ -144,8 +152,10 @@ class EDLManager(object):
                 for mute in mutes:
                     mStart = max(0, mute[0] * durationPerChar - self.safety) + tStart
                     mFinish = min((mute[1] * durationPerChar) + (tStart + mute[0] * durationPerChar) + self.safety, tFinish)
-                    edlFile.write(str(mStart) + "\t" + str(mFinish) + "\t1\t# Muted:" + mute[2] +"\n")
-            
+                    edlFile.write("%09.3f\t%09.3f\t1\t#Muted:'%s'\n" % (mStart, mFinish, mute[2]))
+
+        edlFile.write(MUTE_PROFANITY_MARKER_END)
+        edlFile.write("\n")
         # close files    
         edlFile.close()
         print "Done creating the EDL"

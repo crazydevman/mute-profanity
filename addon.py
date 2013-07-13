@@ -71,14 +71,6 @@ def get_params():
 
 params = get_params()
 
-
-def existsEDL(srtLoc):
-    try:
-        edlLoc = srtLoc[:-3] + "edl"
-        return os.path.isfile(edlLoc)
-    except:
-        return False
-
 def get_blocked_words():
     filterLoc = os.path.join(BASE_RESOURCE_PATH, "filter.txt")
     categories = filter.parse_file(filterLoc)
@@ -94,11 +86,6 @@ def createEDL():
         safety = Addon.getSetting("safety")
         safety = float(safety) / 1000
         edl = EDLManager(srtLoc, get_blocked_words(), safety)
-        if existsEDL(srtLoc):
-            ret = dialog.yesno(details['label'], Addon.getLocalizedString(30301))
-            if not ret:
-                return False
-
         if Addon.getSetting("editsrt") == "true":
             # Tell the edl manager to replace blocked works on SRT file too
             edl.modify_srt = True

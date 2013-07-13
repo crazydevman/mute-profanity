@@ -12,9 +12,7 @@ def log(*args):
 
 class MKVExtractor:
     def __init__(self, toolsDir=''):
-        if not toolsDir and os.name != 'nt':
-            if not os.getenv('PATH'):
-                os.putenv('PATH', '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin:/opt/X11/bin')
+        log("toolsDir: %s" % toolsDir)
 
         self.toolsDir = toolsDir
         self.progress = 0

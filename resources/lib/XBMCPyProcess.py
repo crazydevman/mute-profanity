@@ -6,10 +6,8 @@ import threading
 import time
 import tempfile
 
-
 class Process(object):
     def __init__(self, args):
-        os.name = 'nt'
         if os.name == 'nt':
             self.proc = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
             self.stdout = self.proc.stdout
@@ -33,7 +31,7 @@ class Process(object):
         """
         cmd = ' '.join("'" + arg + "'" for arg in args) + " > " + self._unix_fifo.name
         print 'Executing this command: ' + cmd
-        #xbmc.executebuiltin('System.Exec(%s)' % cmd)
+        #self._unix_exit_code = xbmc.executebuiltin('System.Exec(%s)' % cmd)
         self._unix_exit_code = os.system(cmd)
 
         print "Done..."
