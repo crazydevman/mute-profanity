@@ -50,6 +50,7 @@ class EDLManager(object):
                 print "About to write these lines: %s" % str(lines_to_write)
                 edlFile.writelines(lines_to_write)
 
+        edlFile.write("\n")
         edlFile.write(MUTE_PROFANITY_MARKER_START)
         edlFile.write("\n")
         return edlFile
@@ -164,6 +165,7 @@ class EDLManager(object):
             print "Overwriting the existing srt file with stars"
             srtNewLoc = self.srtLoc[:-3] + "tmp"
             NewSRTFile = open(srtNewLoc, 'w')
+            srtFile.seek(0)
             for line in srtFile.readlines():
                 for word in self.blocked_words:
                     regex = r"\b(?i)" + word + r"\b"
@@ -175,6 +177,7 @@ class EDLManager(object):
                 # Don't overwrite the original srt file (with the curse words)
                 os.rename(self.srtLoc, self.srtLoc + ".bck")
             os.rename(srtNewLoc, self.srtLoc)
+            print "Done with srt file edit"
 
         srtFile.close()
 

@@ -34,6 +34,7 @@ def get_blocked_words(categories, severities):
     for key, value in severities.iteritems():
         if not value:
             print "Not blocking words of category: " + key
+            continue
         if key in categories:
             words.extend(get_words_ge_severity(categories[key], value))
         else:

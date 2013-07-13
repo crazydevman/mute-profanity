@@ -75,6 +75,10 @@ def get_blocked_words():
     filterLoc = os.path.join(BASE_RESOURCE_PATH, "filter.txt")
     categories = filter.parse_file(filterLoc)
     mapping = {'0': None, '1': 10, '2': 8, '3': 6, '4': 2}
+    xbmc.log('Cat1: ' + Addon.getSetting("blockcat1"))
+    xbmc.log('Cat2: ' + Addon.getSetting("blockcat2"))
+    xbmc.log('Cat3: ' + Addon.getSetting("blockcat3"))
+    xbmc.log('Cat4: ' + Addon.getSetting("blockcat4"))
     severities = {'Expletives': mapping[Addon.getSetting("blockcat1")],
                   'Religious': mapping[Addon.getSetting("blockcat2")],
                   'Sexual': mapping[Addon.getSetting("blockcat3")],

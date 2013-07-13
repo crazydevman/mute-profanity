@@ -34,11 +34,13 @@ class SubFinder():
         head, ext = os.path.splitext(os.path.basename(fileLoc))
         log("head: %s" % head)
         
-        #First check existing subtitle files, especially existing SRT
+        #First check existing subtitle files, especially existing SRT backups
         for fname in os.listdir(os.path.dirname(fileLoc)):
             log("Checking fname: %s" % fname)
             if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".srt":
                 fname = os.path.join(os.path.dirname(fileLoc), fname)
+                if os.path.isfile(fname + ".bck"):
+                    os.rename(fname + ".bck", fname)
                 log("Found existing SRT file: %s" % fname)
                 return fname
                 
