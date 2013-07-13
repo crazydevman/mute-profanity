@@ -80,7 +80,7 @@ def getInitialListing():
     listing.append(['Edit Movies', sys.argv[0] + "?mode=movies"])
     listing.append(['Edit TV Shows', sys.argv[0] + "?mode=tv"])
     listing.append(['View Active Blocked List', sys.argv[0] + "?mode=view-active"])
-    listing.append(['Manage Filtered Words', sys.argv[0] + "?mode=manage-filter"])
+    listing.append(['View All Words', sys.argv[0] + "?mode=show-all"])
     return listing
 
 
@@ -185,10 +185,11 @@ def handle(params):
         show = dialog.yesno("WARNING", "This will show offensive words on screen.\nAre you sure you want to view it now?")
         if show:
             showSimpleListing(getWordsListing())
-    elif mode == 'manage-filter':
+    elif mode == 'show-all':
         show = dialog.yesno("WARNING", "This will show offensive words on screen.\nAre you sure you want to view it now?")
         if show:
-            dialog.ok('XBMC', 'You will see it now')
+            dialog.ok('XBMC', "To edit this list, modify 'filter.txt' in the script's directory" )
+            showSimpleListing(getWordsListing(True))
     elif mode == 'word-details':
         categoryId = int(urllib.unquote_plus(params["categoryId"]))
         wordId = int(urllib.unquote_plus(params["wordId"]))
@@ -208,7 +209,7 @@ def handle(params):
         line1 = "Severity (1 is lowest, 10 is most offensive): %d" % severity
 
         if blockNum:
-            line2 = 'Setting for category blocks words with severity >= %d' % blockNum
+            line2 = 'Current category setting blocks words with severity >= %d' % blockNum
         else:
             line2 = 'No setting for this category, cannot block it'
 
