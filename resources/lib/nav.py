@@ -48,10 +48,10 @@ def showSimpleListing(listing, isDir=True):
     xbmcplugin.endOfDirectory(_thisPlugin)
 
 
-def showThumbnailListing(listing):
+def showThumbnailListing(listing, isDir=False):
     for item in listing:
         listItem = xbmcgui.ListItem(label=item[0], thumbnailImage=item[1])
-        xbmcplugin.addDirectoryItem(_thisPlugin,item[2],listItem)
+        xbmcplugin.addDirectoryItem(_thisPlugin,item[2],listItem, isDir)
 
     # tell xbmc we have finished creating
     xbmcplugin.endOfDirectory(_thisPlugin)
@@ -170,6 +170,25 @@ def handle(params):
                 dialog.ok(details['label'], Addon.getLocalizedString(30303))
             else:
                 dialog.ok(details['label'], Addon.getLocalizedString(30307))
+    elif mode == 'mute-episode':
+        episodeId = urllib.unquote_plus(params["id"])
+        xbmc.log("episodeId: %s" % str(episodeId))
+        details = data.getEpisodeDetails(episodeId)
+        xbmc.log('details: %s' % details)
+
+        ret = dialog.yesno(details['showtitle'], Addon.getLocalizedString(30308))
+        if not ret:
+            sys.exit()
+
+        fileLoc = details['file']
+        finder = subf.SubFinder(Addon)
+        srtLoc = finder.getSRT(fileLoc)
+        if srtLoc:
+            xbmc.log("Using srt file: %s" % srtLoc)
+            if createEDL(srtLoc):
+                dialog.ok(details['showtitle'], Addon.getLocalizedString(30309))
+            else:
+                dialog.ok(details['showtitle'], Addon.getLocalizedString(30307))
     elif mode == 'movies':
         movieDict = data.GetAllMovies()
         xbmc.log("movieDict: %s" % movieDict)
@@ -179,8 +198,22 @@ def handle(params):
             listing.append([movie['label'], movie['thumbnail'], url])
         showThumbnailListing(listing)
     elif mode == 'tv':
-        dialog = xbmcgui.Dialog()
-        dialog.ok('Error', 'Not yet supported: TV Shows')
+        shows = data.GetAllTVShows()
+        xbmc.log('tv shows: %s' % shows)
+        listing = []
+        for show in shows:
+            url = sys.argv[0] + "?mode=tvshow-details&id=" + str(show['tvshowid'])
+            listing.append([show['label'], show['thumbnail'], url])
+        showThumbnailListing(listing, True)
+    elif mode == 'tvshow-details':
+        showId = urllib.unquote_plus(params["id"])
+        episodes = data.GetTVShowEpisodes(showId)
+        xbmc.log('episodes: %s' % episodes)
+        listing = []
+        for episode in episodes:
+            url = sys.argv[0] + "?mode=mute-episode&id=" + str(episode['episodeid'])
+            listing.append([episode['label'], episode['thumbnail'], url])
+        showThumbnailListing(listing, True)
     elif mode == 'view-active':
         show = dialog.yesno("WARNING", "This will show offensive words on screen.\nAre you sure you want to view it now?")
         if show:
