@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
     id="plugin.video.mute-profanity"
-    version="1.0.0"
+    version="1.0.1"
     name="Mute Profanity"
     provider-name="Scott Brown" >
     
