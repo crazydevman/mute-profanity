@@ -8,6 +8,7 @@ Last Update on Apr 23, 2015
 import sys
 import re
 import os
+import traceback
 
 MUTE_PROFANITY_MARKER_START = "###### This section is automatically maintained by the Mute Profanity plugin ######"
 MUTE_PROFANITY_MARKER_END = "###### END Mute Profanity plugin section ######"
@@ -60,6 +61,7 @@ class EDLManager(object):
             srtFile = open(self.srtLoc, 'rU')
         except IOError:
             print "Cannot open .srt file"
+            traceback.print_exc()
             sys.exit()
         
         try:
@@ -119,7 +121,7 @@ class EDLManager(object):
             for one in one_char:
                 subtitle = subtitle.replace(one, " ")
             subtitle = subtitle.strip()
-            subtitle = subtitle.strip(' -?!.')
+            subtitle = subtitle.strip(' -?!.-')
             
             # find matches, store timing and muted word in mutes array
             mutes = []
@@ -150,11 +152,28 @@ class EDLManager(object):
                        sfloat(times, 26, 29) / 1000.0)
                 tDuration = tFinish - tStart
                 durationPerChar = tDuration / len(subtitle)
+
+                lastEnd = tStart
+                toWrite = []
             
                 for mute in mutes:
-                    mStart = max(0, mute[0] * durationPerChar - self.safety) + tStart
-                    mFinish = min((mute[1] * durationPerChar) + (tStart + mute[0] * durationPerChar) + self.safety, tFinish)
-                    edlFile.write("%09.3f\t%09.3f\t1\t#Muted:'%s'\n" % (mStart, mFinish, mute[2]))
+                    if mute[1] < 6: # Add some extra mute padding
+                        padding = float(6 - mute[1]) / 2
+                        mute = (float(mute[0]) - padding, 6, mute[2])
+                    mStart = max((mute[0] * durationPerChar - self.safety) + tStart, lastEnd)
+                    lastEnd = mFinish = min((mute[1] * durationPerChar) + (tStart + mute[0] * durationPerChar) + self.safety, tFinish)
+
+                    if len(toWrite) and toWrite[-1][1] == mStart:
+                        lastTuple = toWrite[-1]
+                        # instead of adding new entry, just increase the last one
+                        toWrite[-1] = (lastTuple[0], mFinish, lastTuple[2] + "," + mute[2])
+                        print "Single entry for multiple mutes: " + str(toWrite[-1][2])
+                    else:
+                        toWrite.append((mStart, mFinish, mute[2]))
+
+                for entry in toWrite:
+                    edlFile.write("%09.3f\t%09.3f\t1\t#Muted:'%s'\n" % entry)
+                    print "Muted from %s to %s" % (str(entry[0]), str(entry[1]))
 
         edlFile.write(MUTE_PROFANITY_MARKER_END)
         edlFile.write("\n")
@@ -178,8 +197,8 @@ class EDLManager(object):
             srtFile.close()
 
             print "New file created, move the original srt so it's not lost"
-            self.rename(self.srtLoc, self.srtLoc + ".bak")
-            print "New path for original srt file: " + self.srtLoc + ".bak (not edited)"
+            self.rename(self.srtLoc, self.srtLoc + ".mpbak")
+            print "New path for original srt file: " + self.srtLoc + ".mpbak (not edited)"
             print "Now move the newly created srt file to the original location"
             self.rename(self.srtLoc + ".tmp", self.srtLoc)
             print "Done with srt file edit"

@@ -15,6 +15,7 @@ import ssatool
 import smi2srt
 
 import xbmcgui
+import xbmcvfs
 
 def log(*args):
     for arg in args:
@@ -36,11 +37,20 @@ class SubFinder():
         
         #First check existing subtitle files, especially existing SRT backups
         for fname in os.listdir(os.path.dirname(fileLoc)):
+            parts = os.path.splitext(fname)
+            if len(parts) == 2 and parts[1].lower() == ".mpbak" and parts[0].endswith(".srt"):
+                originalname = os.path.join(os.path.dirname(fileLoc), fname[:-len(".mpbak")])
+                log("Found backup srt file, renaming to original name: " + originalname)
+                if xbmcvfs.exists(originalname):
+                    log("Removing the original file name so we can rename")
+                    xbmcvfs.delete(originalname)
+                xbmcvfs.rename(os.path.join(os.path.dirname(fileLoc), fname), originalname)
+                return originalname
+
+        for fname in os.listdir(os.path.dirname(fileLoc)):
             log("Checking fname: %s" % fname)
             if fname.startswith(head) and os.path.splitext(fname)[1].lower() == ".srt":
                 fname = os.path.join(os.path.dirname(fileLoc), fname)
-                if os.path.isfile(fname + ".bck"):
-                    os.rename(fname + ".bck", fname)
                 log("Found existing SRT file: %s" % fname)
                 return fname
                 
