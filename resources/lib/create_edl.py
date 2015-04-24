@@ -19,7 +19,7 @@ def main():
 
     categories = filter.parse_file(args[2])
     profanity = filter.get_all_words(categories)
-    worker = EDLManager(args[1], profanity);
+    worker = EDLManager(args[1], profanity)
     
     if len(args) == 4:
         worker.setEDLName(args[3])

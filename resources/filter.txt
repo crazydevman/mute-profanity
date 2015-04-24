@@ -33,6 +33,7 @@ Category: Sexual
 clit: 8
 clitoris: 8
 cock: 10
+cocksucker: 10
 cock*: 8
 cunt*: 10
 porn*: 4
@@ -45,7 +46,7 @@ pussy*: 8
 dick*: 8
 piss*: 6
 dildo*: 6
-ejaculat*: 8
+ejaculat*: 6
 slut*: 6
 cumshot: 8
 wanker: 8

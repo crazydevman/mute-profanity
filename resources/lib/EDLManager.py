@@ -1,6 +1,6 @@
 """
 Created on Apr 7, 2012
-Last Update on July 12, 2013
+Last Update on Apr 23, 2015
 
 @author: Scott Brown
 """
@@ -13,14 +13,14 @@ MUTE_PROFANITY_MARKER_START = "###### This section is automatically maintained b
 MUTE_PROFANITY_MARKER_END = "###### END Mute Profanity plugin section ######"
 
 class EDLManager(object):
-    def __init__(self, srtLoc, blocked_words, safety=.35):
+    def __init__(self, srtLoc, fileLoc, blocked_words, safety=.35):
         """
         Constructor
         """
         self.srtLoc = srtLoc
         self.blocked_words = blocked_words
         self.safety = safety
-        self.edlLoc = srtLoc[:-3] + "edl"
+        self.edlLoc = os.path.splitext(fileLoc)[0] + ".edl"
         self.modify_srt = False
         
     def setEDLName(self, name):
@@ -164,8 +164,8 @@ class EDLManager(object):
 
         if self.modify_srt:
             print "Overwriting the existing srt file with stars"
-            srtNewLoc = self.srtLoc[:-3] + "tmp"
-            NewSRTFile = open(srtNewLoc, 'w')
+            print "First create a new file with the swears blocked out"
+            NewSRTFile = self.open_file(self.srtLoc + ".tmp", 'w')
             srtFile.seek(0)
             for line in srtFile.readlines():
                 for word in self.blocked_words:
@@ -175,14 +175,23 @@ class EDLManager(object):
                 NewSRTFile.write(line)
 
             NewSRTFile.close()
-            if not os.path.isfile(self.srtLoc + ".bck"):
-                # Don't overwrite the original srt file (with the curse words)
-                os.rename(self.srtLoc, self.srtLoc + ".bck")
-            os.rename(srtNewLoc, self.srtLoc)
+            srtFile.close()
+
+            print "New file created, move the original srt so it's not lost"
+            self.rename(self.srtLoc, self.srtLoc + ".bak")
+            print "New path for original srt file: " + self.srtLoc + ".bak (not edited)"
+            print "Now move the newly created srt file to the original location"
+            self.rename(self.srtLoc + ".tmp", self.srtLoc)
             print "Done with srt file edit"
+        else:
+            srtFile.close()
 
-        srtFile.close()
 
+    def open_file(self, filePath, mode):
+        return open(filePath, mode)
+
+    def rename(self, src, dst):
+        os.rename(src, dst)
 
 def sfloat(times, start, end):
     try:
