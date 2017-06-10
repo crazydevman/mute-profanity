@@ -188,7 +188,7 @@ def handle(params):
         srtLoc = finder.getSRT(fileLoc)
         if srtLoc:
             xbmc.log("Using srt file: %s" % srtLoc)
-            if createEDL(srtLoc):
+            if createEDL(srtLoc, fileLoc):
                 dialog.ok(details['showtitle'], Addon.getLocalizedString(30309))
             else:
                 dialog.ok(details['showtitle'], Addon.getLocalizedString(30307))
