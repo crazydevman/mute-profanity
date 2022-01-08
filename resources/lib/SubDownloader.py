@@ -98,7 +98,7 @@ def Compute(name):
     try:
         longlongformat = "q"  # long long
         bytesize = struct.calcsize(longlongformat)
-        f = file(name, "rb")
+        f = open(name, "rb")
         filesize = os.path.getsize(name)
         hash = filesize
 
@@ -131,13 +131,13 @@ def Unzip(zipname, unzipname, subname=None):
     if not subname:
         for filename in z.namelist():
             if os.path.splitext(os.path.basename(filename))[1] == ".srt":
-                outfile = file(unzipname, "w")
+                outfile = open(unzipname, "w")
                 outfile.write(z.read(filename))
                 outfile.close()
                 break
     else:
         # Subtitle file specified, just use that one
-        outfile = file(unzipname, "w")
+        outfile = open(unzipname, "w")
         outfile.write(z.read(subname))
         outfile.close()
 
