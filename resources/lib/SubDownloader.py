@@ -8,8 +8,8 @@ import traceback
 from threading import Thread
 
 from zipfile import *
-from xmlrpclib import ServerProxy
-from urllib2 import Request, urlopen
+from xmlrpc.client import ServerProxy
+from urllib import request
 
 text_characters = "".join(map(chr, range(32, 127)) + list("\n\r\t\b"))
 _null_trans = string.maketrans("", "")
@@ -159,8 +159,8 @@ def istext(s):
 
 
 def Download(url, filename):
-    req = Request(url)
-    f = urlopen(req)
+    req = request(url)
+    f = req.urlopen(req)
     print("downloading " + url, file=sys.stderr)
     print("save to " + filename + ".zip", file=sys.stderr)
     # Open our local file for writing
