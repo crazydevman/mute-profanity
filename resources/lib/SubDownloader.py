@@ -11,7 +11,8 @@ from zipfile import *
 from xmlrpc.client import ServerProxy
 from urllib import request
 
-text_characters = "".join(map(chr, range(32, 127)) + list("\n\r\t\b"))
+all_chars=[chr(x) for x in range(32, 127)] + list("\n\r\t\b")
+text_characters = "".join(all_chars)
 _null_trans = string.maketrans("", "")
 
 server = ServerProxy("http://api.opensubtitles.org/xml-rpc")
