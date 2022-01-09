@@ -2,7 +2,6 @@
 
 import struct
 import os
-import string
 import sys
 import traceback
 from threading import Thread
@@ -13,7 +12,7 @@ from urllib import request
 
 all_chars=[chr(x) for x in range(32, 127)] + list("\n\r\t\b")
 text_characters = "".join(all_chars)
-_null_trans = string.maketrans("", "")
+_null_trans = str.maketrans("", "")
 
 server = ServerProxy("http://api.opensubtitles.org/xml-rpc")
 token = ""
