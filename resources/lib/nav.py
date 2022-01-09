@@ -21,7 +21,7 @@ __cwd__ = Addon.getAddonInfo("path")
 __version__ = Addon.getAddonInfo("version")
 
 
-BASE_RESOURCE_PATH = xbmc.translatePath(os.path.join(__addon_path__, "resources"))
+BASE_RESOURCE_PATH = xbmcvfs.translatePath(os.path.join(__addon_path__, "resources"))
 MEDIA_PATH = os.path.join(BASE_RESOURCE_PATH, "media")
 BACKGROUND_FILE = os.path.join(MEDIA_PATH, "BackgroundPanel.png")
 
