@@ -15,6 +15,10 @@ from copy import copy
 from datetime import datetime
 
 
+def cmp(a, b):
+    return (a > b) - (a < b)
+
+
 class SSADialogueEvent(object):
     """Container for a single line of an SSA script."""
 
@@ -130,12 +134,14 @@ end_cmp = lambda a, b: cmp(a.end, b.end)
 
 def main(infile, outfile=None):
     stream = codecs.open(infile, "r", "utf8")
-    if not outFile:
+    if outfile is not None:
         outfile = os.path.splitext(infile)[0] + ".srt"
     sink = codecs.open(outfile, "w", "utf8")
 
     # HACK: Handle UTF-8 files with Byte-Order Markers.
-    if stream.read(1) == unicode(codecs.BOM_UTF8, "utf8"):
+    if stream.read(1) == unicode(
+        codecs.BOM_UTF8, "utf8"
+    ):  # got rid of unicode. may need to fix later
         stream.seek(3)
     else:
         stream.seek(0)
