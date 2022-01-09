@@ -2,77 +2,93 @@
 
 import struct
 import os
-import string
 import sys
 import traceback
 from threading import Thread
 
 from zipfile import *
-from xmlrpclib import ServerProxy
-from urllib2 import Request, urlopen
+from xmlrpc.client import ServerProxy
+from urllib import request
 
-text_characters = "".join(map(chr, range(32, 127)) + list("\n\r\t\b"))
-_null_trans = string.maketrans("", "")
+all_chars=[chr(x) for x in range(32, 127)] + list("\n\r\t\b")
+text_characters = "".join(all_chars)
+_null_trans = str.maketrans("", "")
 
 server = ServerProxy("http://api.opensubtitles.org/xml-rpc")
 token = ""
 
+
 class ThreadWithReturnValue(Thread):
-    def __init__(self, group=None, target=None, name=None,
-                 args=(), kwargs={}, Verbose=None):
+    def __init__(
+        self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None
+    ):
         Thread.__init__(self, group, target, name, args, kwargs, Verbose)
         self._return = None
+
     def run(self):
         if self._Thread__target is not None:
-            self._return = self._Thread__target(*self._Thread__args,
-                                                **self._Thread__kwargs)
+            self._return = self._Thread__target(
+                *self._Thread__args, **self._Thread__kwargs
+            )
+
     def join(self, timeout=None):
         Thread.join(self, timeout)
         return self._return
 
 
 def FindSubtitles(videoname, lang):
-    print >> sys.stderr, "Contacting www.opensubtitles.org (" + videoname + ")"
-    filename = os.path.join(os.path.dirname(videoname), os.path.splitext(os.path.basename(videoname))[0] + ".srt")
-    print filename
+    print("Contacting www.opensubtitles.org (" + videoname + ")", file=sys.stderr)
+    filename = os.path.join(
+        os.path.dirname(videoname),
+        os.path.splitext(os.path.basename(videoname))[0] + ".srt",
+    )
+    print(filename)
 
     langs = lang.split(",")
 
-    data = GetSubtitles(videoname);
+    data = GetSubtitles(videoname)
     if data:
         for l in langs:
             for item in data:
-                if item['SubLanguageID'] == l:
-                    print >> sys.stderr, "Found", item['LanguageName'], "subtitle ..."
-                    fullFile = os.path.join(os.path.dirname(videoname), item['SubFileName'])
-                    zipname = Download(item['ZipDownloadLink'], fullFile)
-                    print >> sys.stderr, "Extracting subtitle ", filename
-                    Unzip(zipname, filename, item['SubFileName'])
+                if item["SubLanguageID"] == l:
+                    print(
+                        "Found", item["LanguageName"], "subtitle ...", file=sys.stderr
+                    )
+                    fullFile = os.path.join(
+                        os.path.dirname(videoname), item["SubFileName"]
+                    )
+                    zipname = Download(item["ZipDownloadLink"], fullFile)
+                    print(f"Extracting subtitle filename", file=sys.stderr)
+                    Unzip(zipname, filename, item["SubFileName"])
                     os.remove(zipname)
                     return filename
-    print >> sys.stderr, "No Subtitles found"
+    print("No Subtitles found", file=sys.stderr)
     return None
 
 
 def GetSubtitles(moviepath):
-    #print >> sys.stderr, server.LogIn("","","","SubIt")['status']
-    token = server.LogIn("", "", "", "SubIt")['token']
+    # print >> sys.stderr, server.LogIn("","","","SubIt")['status']
+    token = server.LogIn("", "", "", "SubIt")["token"]
 
     moviebytesize = os.path.getsize(moviepath)
     hash = Compute(moviepath)
-    movieInfo = {'sublanguageid': 'eng', 'moviehash': hash, 'moviebytesize': str(moviebytesize)}
+    movieInfo = {
+        "sublanguageid": "eng",
+        "moviehash": hash,
+        "moviebytesize": str(moviebytesize),
+    }
     movies = [movieInfo]
-    data = server.SearchSubtitles(token, movies)['data']
+    data = server.SearchSubtitles(token, movies)["data"]
 
     # if the hash fails, try searching by title of movie (assuming file is named after its title)
     if not data:
         basename = os.path.basename(moviepath)
         name = os.path.splitext(basename)[0]
-        print >> sys.stderr, "Could not find by hash ..."
-        print >> sys.stderr, "Searching by name: \"" + name + "\""
-        movieInfo = {'sublanguageid': 'eng', 'query': name}
+        print("Could not find by hash ...", file=sys.stderr)
+        print('Searching by name: "' + name + '"', file=sys.stderr)
+        movieInfo = {"sublanguageid": "eng", "query": name}
         movies = [movieInfo]
-        data = server.SearchSubtitles(token, movies)['data']
+        data = server.SearchSubtitles(token, movies)["data"]
 
     server.LogOut()
     return data
@@ -80,9 +96,9 @@ def GetSubtitles(moviepath):
 
 def Compute(name):
     try:
-        longlongformat = 'q'  # long long
+        longlongformat = "q"  # long long
         bytesize = struct.calcsize(longlongformat)
-        f = file(name, "rb")
+        f = open(name, "rb")
         filesize = os.path.getsize(name)
         hash = filesize
 
@@ -93,7 +109,7 @@ def Compute(name):
             buffer = f.read(bytesize)
             (l_value,) = struct.unpack(longlongformat, buffer)
             hash += l_value
-            hash = hash & 0xFFFFFFFFFFFFFFFF #to remain as 64bit number
+            hash = hash & 0xFFFFFFFFFFFFFFFF  # to remain as 64bit number
 
         f.seek(max(0, filesize - 65536), 0)
         for x in range(65536 / bytesize):
@@ -115,13 +131,13 @@ def Unzip(zipname, unzipname, subname=None):
     if not subname:
         for filename in z.namelist():
             if os.path.splitext(os.path.basename(filename))[1] == ".srt":
-                outfile = file(unzipname, "w")
+                outfile = open(unzipname, "w")
                 outfile.write(z.read(filename))
                 outfile.close()
                 break
     else:
-        #Subtitle file specified, just use that one
-        outfile = file(unzipname, "w")
+        # Subtitle file specified, just use that one
+        outfile = open(unzipname, "w")
         outfile.write(z.read(subname))
         outfile.close()
 
@@ -143,16 +159,16 @@ def istext(s):
 
 
 def Download(url, filename):
-    req = Request(url)
-    f = urlopen(req)
-    print >> sys.stderr, "downloading " + url
-    print >> sys.stderr, "save to " + filename + ".zip"
+    req = request(url)
+    f = req.urlopen(req)
+    print("downloading " + url, file=sys.stderr)
+    print("save to " + filename + ".zip", file=sys.stderr)
     # Open our local file for writing
     local_file = open(filename + ".zip", "w" + "b")
-    #Write to our local file
+    # Write to our local file
     local_file.write(f.read())
     local_file.close()
-    print >> sys.stderr, "file " + filename + ".zip created"
+    print("file " + filename + ".zip created", file=sys.stderr)
     return filename + ".zip"
 
 
@@ -162,25 +178,26 @@ def StartThreaded(videoname, lang):
     t.start()
     return t
 
+
 def main():
     args = sys.argv
     if len(args) < 3:
-        print "Usage: file language"
+        print("Usage: file language")
         sys.exit(1)
 
     srtFile = None
     try:
         srtFile = FindSubtitles(args[1], args[2])
     except:
-        print >> sys.stderr, traceback.format_exc()
+        print(traceback.format_exc(), file=sys.stderr)
         sys.exit(3)
 
     if not srtFile:
         sys.exit(2)
 
-    print srtFile
+    print(srtFile)
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

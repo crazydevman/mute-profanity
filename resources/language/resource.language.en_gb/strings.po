@@ -1,0 +1,141 @@
+"Last-Translator: Kodi Translation Team\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30100"
+msgid "General"
+msgstr "General"
+
+msgctxt "#30200"
+msgid "Advanced"
+msgstr "Advanced"
+
+msgctxt "#30300"
+msgid "Blocked Words"
+msgstr "Blocked Words"
+
+
+#    <!-- General Settings -->
+msgctxt "#30120"
+msgid "Automatically download missing subtitles"
+msgstr "Automatically download missing subtitles"
+
+msgctxt "#30140"
+msgid "Replace found profanity with **** in subtitle file"
+msgstr "Replace found profanity with **** in subtitle file"
+
+msgctxt "#30160"
+msgid "Mute before and after (in MS)"
+msgstr "Mute before and after (in MS)"
+
+    
+#<!-- Advanced Settings -->
+msgctxt "#30210"
+msgid "Use MKVToolNix subtitles from MKV files"
+msgstr "Use MKVToolNix subtitles from MKV files"
+
+msgctxt "#30211"
+msgid "Folder containing mkvextract &amp; mkvinfo"
+msgstr "Folder containing mkvextract &amp; mkvinfo"
+
+msgctxt "#30220"
+msgid "Use MP4Box to extract subtitles from MP4 files"
+msgstr "Use MP4Box to extract subtitles from MP4 files"
+
+msgctxt "#30221"
+msgid "Folder containing MP4Box"
+msgstr "Folder containing MP4Box"
+
+msgctxt "#30250"
+msgid "Debug Mode (extra logging)"
+msgstr "Debug Mode (extra logging)"
+
+
+#    <!-- Blocking Settings -->
+msgctxt "#30400"
+msgid "Blocking Severity"
+msgstr "Blocking Severity"
+
+msgctxt "#30410"
+msgid "Expletives"
+msgstr "Expletives"
+
+msgctxt "#30411"
+msgid "Religious &amp; Deity"
+msgstr "Religious &amp; Deity"
+
+msgctxt "#30412"
+msgid "Sexual Words"
+msgstr "Sexual Words"
+
+msgctxt "#30413"
+msgid "Derogatory Terms"
+msgstr "Derogatory Terms"
+
+msgctxt "#30420"
+msgid "To block only a few words, set the severity to Low"
+msgstr "To block only a few words, set the severity to Low"
+
+msgctxt "#30421"
+msgid "High values will block more words and are appropriate for young children"
+msgstr "High values will block more words and are appropriate for young children"
+
+msgctxt "#30422"
+msgid "High values cause more false-positives being blocked"
+msgstr "High values cause more false-positives being blocked"
+
+
+#    <!--Messages-->
+msgctxt "#30300"
+msgid "Mute Profanity"
+msgstr "Mute Profanity"
+
+msgctxt "#30301"
+msgid "This will overwrite the existing mute profanity file.
+Are you sure you would like to do this?"
+msgstr "Ovewrite exsitng mute profanity?"
+
+msgctxt "#30302"
+msgid "Do you want mute profanity for this movie?"
+msgstr "Do you want mute profanity for this movie?"
+
+msgctxt "#30303"
+msgid "Success! You can now play the movie normally"
+msgstr "Success! You can now play the movie normally"
+
+msgctxt "#30304"
+msgid "Could not find subtitles file, download one?"
+msgstr "Could not find subtitles file, download one?"
+
+msgctxt "#30305"
+msgid "Downloading subtitles..."
+msgstr "Downloading subtitles..."
+
+msgctxt "#30306"
+msgid "Unable to download file.
+Try again later"
+msgstr "Unable to download"
+
+msgctxt "#30307"
+msgid "Did not finish properly. Check the logs."
+msgstr "Did not finish properly. Check the logs."
+
+msgctxt "#30308"
+msgid "Do you want mute profanity for this episode?"
+msgstr "Do you want mute profanity for this episode?"
+
+msgctxt "#30309"
+msgid "Success! You can now play the episode normally"
+msgstr "Success! You can now play the episode normally"
+
+msgctxt "#30320"
+msgid "Extracting subtitles from movie..."
+msgstr "Extracting subtitles from movie..."
+
+msgctxt "#30321"
+msgid "Problem extracting subtitles from file.
+Check log for details"
+msgstr "Problem extracting see logs"
