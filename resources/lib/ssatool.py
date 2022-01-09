@@ -138,13 +138,13 @@ def main(infile, outfile=None):
         outfile = os.path.splitext(infile)[0] + ".srt"
     sink = codecs.open(outfile, "w", "utf8")
 
-    # HACK: Handle UTF-8 files with Byte-Order Markers.
-    if stream.read(1) == unicode(
-        codecs.BOM_UTF8, "utf8"
-    ):  # got rid of unicode. may need to fix later
-        stream.seek(3)
-    else:
-        stream.seek(0)
+    # # HACK: Handle UTF-8 files with Byte-Order Markers.
+    # if stream.read(1) == unicode(
+    #     codecs.BOM_UTF8, "utf8"
+    # ):  # got rid of unicode. may need to fix later
+    #     stream.seek(3)
+    # else:
+    stream.seek(0)
 
     # Parse the stream one line at a time.
     events = []
@@ -176,7 +176,7 @@ def main(infile, outfile=None):
 
     # Write the file.  SRT requires each event to be numbered.
     index = 1
-    sink.write(unicode(codecs.BOM_UTF8, "utf8"))
+    #sink.write(unicode(codecs.BOM_UTF8, "utf8"))
     for i in merged:
         sink.write(i.out_srt(index) + "\r\n")
         index += 1
